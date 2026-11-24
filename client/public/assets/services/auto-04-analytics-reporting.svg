@@ -1,0 +1,90 @@
+<svg width="800" height="520" viewBox="0 0 800 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="repBg" x1="0" y1="0" x2="800" y2="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#090E1D" />
+      <stop offset="100%" stop-color="#101B33" />
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="520" rx="16" fill="url(#repBg)" />
+  
+  <rect width="100%" height="40" fill="#0C1426" rx="16" />
+  <circle cx="24" cy="20" r="5" fill="#FF5F56" />
+  <circle cx="40" cy="20" r="5" fill="#FFBD2E" />
+  <circle cx="56" cy="20" r="5" fill="#27C93F" />
+  <rect x="80" y="10" width="400" height="20" rx="6" fill="#152342" />
+  <text x="280" y="24" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" text-anchor="middle">PIVO TECH Automated Business Analytics & KPI Reporting Suite</text>
+  <circle cx="760" cy="20" r="3" fill="#C6A15B" />
+
+
+  <!-- Header -->
+  <g transform="translate(40, 60)">
+    <text x="0" y="20" fill="#FFFFFF" font-family="sans-serif" font-size="20" font-weight="800">Operational Health &amp; Automated KPI Reporting</text>
+    <text x="0" y="40" fill="#94A3B8" font-family="sans-serif" font-size="11">Scheduled executive briefings delivered weekly to your inbox and WhatsApp.</text>
+  </g>
+
+  <!-- Big Metrics Row -->
+  <g transform="translate(40, 120)">
+    <rect x="0" y="0" width="225" height="100" rx="12" fill="#152342" stroke="#253556" stroke-width="1" />
+    <text x="18" y="28" fill="#94A3B8" font-family="sans-serif" font-size="11">Time Saved Monthly</text>
+    <text x="18" y="62" fill="#C6A15B" font-family="sans-serif" font-size="28" font-weight="bold">184 hrs</text>
+    <text x="18" y="84" fill="#22C55E" font-family="sans-serif" font-size="10">Equal to 1.2 Full-Time Staff</text>
+
+    <rect x="248" y="0" width="225" height="100" rx="12" fill="#152342" stroke="#253556" stroke-width="1" />
+    <text x="266" y="28" fill="#94A3B8" font-family="sans-serif" font-size="11">Process Accuracy</text>
+    <text x="266" y="62" fill="#38BDF8" font-family="sans-serif" font-size="28" font-weight="bold">99.98%</text>
+    <text x="266" y="84" fill="#94A3B8" font-family="sans-serif" font-size="10">Zero human data entry typos</text>
+
+    <rect x="495" y="0" width="225" height="100" rx="12" fill="#152342" stroke="#253556" stroke-width="1" />
+    <text x="513" y="28" fill="#94A3B8" font-family="sans-serif" font-size="11">Lead Conversion Lift</text>
+    <text x="513" y="62" fill="#22C55E" font-family="sans-serif" font-size="28" font-weight="bold">+42%</text>
+    <text x="513" y="84" fill="#22C55E" font-family="sans-serif" font-size="10">Via &lt; 60s reply automation</text>
+  </g>
+
+  <!-- Reporting Charts Layout -->
+  <g transform="translate(40, 240)">
+    <!-- Chart Box 1 -->
+    <rect x="0" y="0" width="440" height="235" rx="12" fill="#131F38" stroke="#253556" stroke-width="1" />
+    <text x="20" y="30" fill="#FFFFFF" font-family="sans-serif" font-size="14" font-weight="bold">Revenue &amp; Workload Efficiency Trend</text>
+
+    <!-- Bar Chart -->
+    <rect x="40" y="140" width="30" height="60" rx="4" fill="#334155" />
+    <rect x="90" y="120" width="30" height="80" rx="4" fill="#334155" />
+    <rect x="140" y="100" width="30" height="100" rx="4" fill="#C6A15B" fill-opacity="0.4" />
+    <rect x="190" y="80" width="30" height="120" rx="4" fill="#C6A15B" fill-opacity="0.7" />
+    <rect x="240" y="60" width="30" height="140" rx="4" fill="#C6A15B" />
+    <rect x="290" y="45" width="30" height="155" rx="4" fill="#E5C378" />
+    <rect x="340" y="35" width="30" height="165" rx="4" fill="#22C55E" />
+
+    <text x="55" y="215" fill="#94A3B8" font-family="sans-serif" font-size="9" text-anchor="middle">M1</text>
+    <text x="105" y="215" fill="#94A3B8" font-family="sans-serif" font-size="9" text-anchor="middle">M2</text>
+    <text x="155" y="215" fill="#94A3B8" font-family="sans-serif" font-size="9" text-anchor="middle">M3</text>
+    <text x="205" y="215" fill="#94A3B8" font-family="sans-serif" font-size="9" text-anchor="middle">M4</text>
+    <text x="255" y="215" fill="#94A3B8" font-family="sans-serif" font-size="9" text-anchor="middle">M5</text>
+    <text x="305" y="215" fill="#94A3B8" font-family="sans-serif" font-size="9" text-anchor="middle">M6</text>
+    <text x="355" y="215" fill="#94A3B8" font-family="sans-serif" font-size="9" text-anchor="middle">Now</text>
+
+    <!-- Side Box: Automated Export Settings -->
+    <rect x="460" y="0" width="260" height="235" rx="12" fill="#131F38" stroke="#253556" stroke-width="1" />
+    <text x="480" y="30" fill="#FFFFFF" font-family="sans-serif" font-size="13" font-weight="bold">Scheduled Auto-Digest</text>
+    <text x="480" y="48" fill="#94A3B8" font-family="sans-serif" font-size="10">Configured Reports &amp; Delivery</text>
+
+    <g transform="translate(480, 65)">
+      <rect width="220" height="42" rx="8" fill="#1A2846" />
+      <text x="12" y="18" fill="#FFFFFF" font-family="sans-serif" font-size="10" font-weight="bold">Weekly Executive Summary</text>
+      <text x="12" y="32" fill="#C6A15B" font-family="sans-serif" font-size="9">Every Monday 8:00 AM • PDF / Email</text>
+    </g>
+
+    <g transform="translate(480, 115)">
+      <rect width="220" height="42" rx="8" fill="#1A2846" />
+      <text x="12" y="18" fill="#FFFFFF" font-family="sans-serif" font-size="10" font-weight="bold">Daily WhatsApp KPI Ticker</text>
+      <text x="12" y="32" fill="#22C55E" font-family="sans-serif" font-size="9">Daily 9:00 PM • WhatsApp Direct</text>
+    </g>
+
+    <g transform="translate(480, 165)">
+      <rect width="220" height="42" rx="8" fill="#1A2846" />
+      <text x="12" y="18" fill="#FFFFFF" font-family="sans-serif" font-size="10" font-weight="bold">Monthly Client Retention Audit</text>
+      <text x="12" y="32" fill="#38BDF8" font-family="sans-serif" font-size="9">1st of Month • Excel &amp; Webhook</text>
+    </g>
+  </g>
+</svg>

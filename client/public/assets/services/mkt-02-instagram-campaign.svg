@@ -1,0 +1,94 @@
+<svg width="800" height="520" viewBox="0 0 800 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="igBg" x1="0" y1="0" x2="800" y2="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#090E1B" />
+      <stop offset="100%" stop-color="#101B33" />
+    </linearGradient>
+    <linearGradient id="igGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#833AB4" />
+      <stop offset="50%" stop-color="#FD1D1D" />
+      <stop offset="100%" stop-color="#FCB045" />
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="520" rx="16" fill="url(#igBg)" />
+  
+  <rect width="100%" height="40" fill="#0C1426" rx="16" />
+  <circle cx="24" cy="20" r="5" fill="#FF5F56" />
+  <circle cx="40" cy="20" r="5" fill="#FFBD2E" />
+  <circle cx="56" cy="20" r="5" fill="#27C93F" />
+  <rect x="80" y="10" width="400" height="20" rx="6" fill="#152342" />
+  <text x="280" y="24" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" text-anchor="middle">PIVO TECH Instagram Brand Campaign & Social Media Strategy</text>
+  <circle cx="760" cy="20" r="3" fill="#C6A15B" />
+
+
+  <!-- Phone Mockup Center -->
+  <g transform="translate(250, 60)">
+    <rect width="300" height="425" rx="32" fill="#1E293B" stroke="#475569" stroke-width="2.5" />
+    <rect x="10" y="10" width="280" height="405" rx="24" fill="#0C1426" />
+
+    <!-- Top Instagram Bar -->
+    <text x="25" y="40" fill="#FFFFFF" font-family="sans-serif" font-size="14" font-weight="bold">_pivo.tech</text>
+    <circle cx="255" cy="35" r="3" fill="#C6A15B" />
+
+    <!-- Story Avatars -->
+    <circle cx="40" cy="70" r="18" fill="none" stroke="url(#igGrad)" stroke-width="2" />
+    <circle cx="40" cy="70" r="14" fill="#152342" />
+    <text x="40" y="74" fill="#C6A15B" font-family="sans-serif" font-size="9" font-weight="bold" text-anchor="middle">PT</text>
+    <text x="40" y="96" fill="#94A3B8" font-family="sans-serif" font-size="8" text-anchor="middle">Agency</text>
+
+    <circle cx="85" cy="70" r="16" fill="#152342" stroke="#334155" stroke-width="1" />
+    <text x="85" y="96" fill="#94A3B8" font-family="sans-serif" font-size="8" text-anchor="middle">Work</text>
+
+    <circle cx="130" cy="70" r="16" fill="#152342" stroke="#334155" stroke-width="1" />
+    <text x="130" y="96" fill="#94A3B8" font-family="sans-serif" font-size="8" text-anchor="middle">AI Bots</text>
+
+    <circle cx="175" cy="70" r="16" fill="#152342" stroke="#334155" stroke-width="1" />
+    <text x="175" y="96" fill="#94A3B8" font-family="sans-serif" font-size="8" text-anchor="middle">Reviews</text>
+
+    <!-- Post Card -->
+    <rect x="15" y="115" width="250" height="240" rx="10" fill="#152342" stroke="#253556" stroke-width="1" />
+    <!-- Post Visual -->
+    <rect x="15" y="115" width="250" height="150" rx="10" fill="#101B33" />
+    <text x="140" y="165" fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="800" text-anchor="middle">BUILD. GROW. AUTOMATE.</text>
+    <text x="140" y="185" fill="#C6A15B" font-family="sans-serif" font-size="11" font-weight="bold" text-anchor="middle">PIVO TECH Digital Agency</text>
+    <rect x="80" y="200" width="120" height="22" rx="4" fill="#C6A15B" />
+    <text x="140" y="215" fill="#0C1426" font-family="sans-serif" font-size="9" font-weight="bold" text-anchor="middle">Transform Your Business</text>
+
+    <!-- Post Actions -->
+    <text x="25" y="285" fill="#EF4444" font-size="14">♥</text>
+    <text x="45" y="285" fill="#CBD5E1" font-family="sans-serif" font-size="11" font-weight="bold">1,842 likes</text>
+    <text x="25" y="305" fill="#FFFFFF" font-family="sans-serif" font-size="10" font-weight="bold">_pivo.tech</text>
+    <text x="75" y="305" fill="#CBD5E1" font-family="sans-serif" font-size="10">High-converting digital architecture.</text>
+    <text x="25" y="322" fill="#94A3B8" font-family="sans-serif" font-size="9">View all 128 comments</text>
+
+    <!-- Bottom Nav -->
+    <line x1="10" y1="375" x2="270" y2="375" stroke="#1E293B" />
+    <circle cx="40" cy="392" r="6" fill="#FFFFFF" />
+    <circle cx="105" cy="392" r="6" fill="#64748B" />
+    <circle cx="170" cy="392" r="6" fill="#64748B" />
+    <circle cx="235" cy="392" r="6" fill="#C6A15B" />
+  </g>
+
+  <!-- Left Stats Callout -->
+  <g transform="translate(40, 160)">
+    <rect width="180" height="150" rx="12" fill="#152342" stroke="#253556" stroke-width="1" />
+    <text x="18" y="28" fill="#E4405F" font-family="sans-serif" font-size="11" font-weight="bold">INSTAGRAM METRICS</text>
+    <text x="18" y="55" fill="#FFFFFF" font-family="sans-serif" font-size="20" font-weight="bold">18.4K Reach</text>
+    <text x="18" y="75" fill="#22C55E" font-family="sans-serif" font-size="11">↑ 140% Engagement</text>
+    <text x="18" y="100" fill="#CBD5E1" font-family="sans-serif" font-size="10">• High-retention Reels</text>
+    <text x="18" y="118" fill="#CBD5E1" font-family="sans-serif" font-size="10">• Targeted local campaigns</text>
+    <text x="18" y="136" fill="#CBD5E1" font-family="sans-serif" font-size="10">• WhatsApp bio conversion</text>
+  </g>
+
+  <!-- Right Audience Callout -->
+  <g transform="translate(580, 160)">
+    <rect width="180" height="150" rx="12" fill="#152342" stroke="#253556" stroke-width="1" />
+    <text x="18" y="28" fill="#C6A15B" font-family="sans-serif" font-size="11" font-weight="bold">TARGET AUDIENCE</text>
+    <text x="18" y="55" fill="#FFFFFF" font-family="sans-serif" font-size="18" font-weight="bold">B2B &amp; Direct Leads</text>
+    <text x="18" y="75" fill="#38BDF8" font-family="sans-serif" font-size="11">Tamil Nadu &amp; Pan-India</text>
+    <text x="18" y="100" fill="#CBD5E1" font-family="sans-serif" font-size="10">• Startups &amp; Founders</text>
+    <text x="18" y="118" fill="#CBD5E1" font-family="sans-serif" font-size="10">• Retail &amp; Logistics</text>
+    <text x="18" y="136" fill="#CBD5E1" font-family="sans-serif" font-size="10">• Healthcare &amp; Services</text>
+  </g>
+</svg>

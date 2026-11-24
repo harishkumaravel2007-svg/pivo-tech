@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" fill="none">
+  <!-- PIVO TECH Geometric Emblem -->
+  <defs>
+    <linearGradient id="pivoGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E5C378"/>
+      <stop offset="50%" stop-color="#C6A15B"/>
+      <stop offset="100%" stop-color="#9E7D3B"/>
+    </linearGradient>
+    <linearGradient id="pivoNavyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E2F52"/>
+      <stop offset="100%" stop-color="#101B33"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer Rounded Shield / Frame -->
+  <rect x="2" y="2" width="44" height="44" rx="12" fill="url(#pivoNavyGrad)" stroke="#C6A15B" stroke-width="1.5" stroke-opacity="0.5"/>
+  
+  <!-- Geometric Stem -->
+  <rect x="13" y="12" width="5.5" height="24" rx="2.5" fill="#FFFFFF"/>
+  
+  <!-- Upper Geometric Loop of the P -->
+  <path d="M18.5 12H27C31.4183 12 35 15.5817 35 20C35 24.4183 31.4183 28 27 28H18.5V22.5H26.5C27.8807 22.5 29 21.3807 29 20C29 18.6193 27.8807 17.5 26.5 17.5H18.5V12Z" fill="url(#pivoGoldGrad)"/>
+  
+  <!-- Tech Core Dot (Automation / Focus) -->
+  <circle cx="23.5" cy="20" r="2.2" fill="#FFFFFF"/>
+  
+  <!-- Subtle dynamic accelerator notch -->
+  <path d="M13 28.5L18.5 34V28.5H13Z" fill="url(#pivoGoldGrad)" opacity="0.9"/>
+</svg>

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <!-- PIVO TECH Standalone Geometric Emblem -->
+  <defs>
+    <linearGradient id="symGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E5C378"/>
+      <stop offset="50%" stop-color="#C6A15B"/>
+      <stop offset="100%" stop-color="#9E7D3B"/>
+    </linearGradient>
+    <linearGradient id="symNavyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#192849"/>
+      <stop offset="100%" stop-color="#101B33"/>
+    </linearGradient>
+    <filter id="symShadow" x="-10%" y="-10%" width="120%" height="120%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#symNavyGrad)" stroke="#C6A15B" stroke-width="2" stroke-opacity="0.45" filter="url(#symShadow)"/>
+  
+  <!-- Geometric Stem -->
+  <rect x="18" y="16" width="7" height="32" rx="3.5" fill="#FFFFFF"/>
+  
+  <!-- Geometric Loop -->
+  <path d="M25 16H36C41.5228 16 46 20.4772 46 26C46 31.5228 41.5228 36 36 36H25V29H35C36.6569 29 38 27.6569 38 26C38 24.3431 36.6569 23 35 23H25V16Z" fill="url(#symGoldGrad)"/>
+  
+  <!-- Automation Core Dot -->
+  <circle cx="31.5" cy="26" r="3" fill="#FFFFFF"/>
+  
+  <!-- Foundation Accent Wedge -->
+  <path d="M18 38L25 45V38H18Z" fill="url(#symGoldGrad)"/>
+</svg>

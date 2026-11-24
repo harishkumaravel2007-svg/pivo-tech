@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" fill="none">
+  <defs>
+    <linearGradient id="nBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#101B33"/>
+      <stop offset="100%" stop-color="#090E1A"/>
+    </linearGradient>
+    <linearGradient id="nGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E5C378"/>
+      <stop offset="100%" stop-color="#C6A15B"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="500" fill="url(#nBg)"/>
+  
+  <!-- Subtle Grid lines -->
+  <g opacity="0.06" stroke="#FFFFFF" stroke-width="1">
+    <line x1="0" y1="100" x2="800" y2="100"/>
+    <line x1="0" y1="200" x2="800" y2="200"/>
+    <line x1="0" y1="300" x2="800" y2="300"/>
+    <line x1="0" y1="400" x2="800" y2="400"/>
+    <line x1="200" y1="0" x2="200" y2="500"/>
+    <line x1="400" y1="0" x2="400" y2="500"/>
+    <line x1="600" y1="0" x2="600" y2="500"/>
+  </g>
+
+  <!-- Browser Window Mockup -->
+  <g transform="translate(60, 50)">
+    <rect width="680" height="400" rx="12" fill="#15213D" stroke="#25355B" stroke-width="1.5"/>
+    <!-- Browser Top Bar -->
+    <rect width="680" height="40" rx="12" fill="#0C1424"/>
+    <circle cx="25" cy="20" r="5" fill="#EF4444"/>
+    <circle cx="45" cy="20" r="5" fill="#F59E0B"/>
+    <circle cx="65" cy="20" r="5" fill="#10B981"/>
+    <rect x="90" y="10" width="300" height="20" rx="6" fill="#1A2A4C"/>
+    <text x="105" y="24" fill="#64748B" font-family="monospace" font-size="10">https://nexus-portal.example.com</text>
+
+    <!-- App Content Inside -->
+    <!-- Navbar inside preview -->
+    <rect x="30" y="60" width="120" height="18" rx="4" fill="url(#nGold)"/>
+    <rect x="480" y="62" width="50" height="14" rx="3" fill="#334155"/>
+    <rect x="540" y="62" width="50" height="14" rx="3" fill="#334155"/>
+    <rect x="600" y="58" width="50" height="22" rx="6" fill="#2563EB"/>
+
+    <!-- Hero banner inside preview -->
+    <rect x="30" y="100" width="360" height="28" rx="6" fill="#FFFFFF"/>
+    <rect x="30" y="136" width="300" height="14" rx="4" fill="#94A3B8"/>
+    <rect x="30" y="156" width="220" height="14" rx="4" fill="#64748B"/>
+    <rect x="30" y="185" width="110" height="28" rx="6" fill="url(#nGold)"/>
+
+    <!-- Right Hero Graphic -->
+    <rect x="420" y="95" width="230" height="140" rx="8" fill="#1E2F54" stroke="#C6A15B" stroke-width="1" stroke-opacity="0.3"/>
+    <polyline points="440,200 480,160 520,180 570,130 620,140" fill="none" stroke="url(#nGold)" stroke-width="3"/>
+
+    <!-- 3 Cards -->
+    <rect x="30" y="255" width="195" height="115" rx="8" fill="#1A2744" stroke="#25355B" stroke-width="1"/>
+    <circle cx="60" cy="285" r="14" fill="#2563EB" opacity="0.3"/>
+    <rect x="50" y="315" width="120" height="12" rx="3" fill="#FFFFFF"/>
+    <rect x="50" y="335" width="90" height="8" rx="2" fill="#64748B"/>
+
+    <rect x="242" y="255" width="195" height="115" rx="8" fill="#1A2744" stroke="#25355B" stroke-width="1"/>
+    <circle cx="272" cy="285" r="14" fill="#C6A15B" opacity="0.3"/>
+    <rect x="262" y="315" width="120" height="12" rx="3" fill="#FFFFFF"/>
+    <rect x="262" y="335" width="100" height="8" rx="2" fill="#64748B"/>
+
+    <rect x="455" y="255" width="195" height="115" rx="8" fill="#1A2744" stroke="#25355B" stroke-width="1"/>
+    <circle cx="485" cy="285" r="14" fill="#10B981" opacity="0.3"/>
+    <rect x="475" y="315" width="120" height="12" rx="3" fill="#FFFFFF"/>
+    <rect x="475" y="335" width="80" height="8" rx="2" fill="#64748B"/>
+  </g>
+
+  <!-- Concept Demo Ribbon -->
+  <g transform="translate(620, 20)">
+    <rect width="150" height="26" rx="6" fill="#101B33" stroke="url(#nGold)" stroke-width="1"/>
+    <text x="75" y="17" fill="#E5C378" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" text-anchor="middle" letter-spacing="0.5">CONCEPT DEMO</text>
+  </g>
+</svg>

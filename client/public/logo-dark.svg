@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 52" width="240" height="52" fill="none">
+  <!-- PIVO TECH Official Logo - Dark Background Edition -->
+  <defs>
+    <linearGradient id="ldGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E5C378"/>
+      <stop offset="50%" stop-color="#C6A15B"/>
+      <stop offset="100%" stop-color="#9E7D3B"/>
+    </linearGradient>
+    <linearGradient id="ldNavyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1A2A4C"/>
+      <stop offset="100%" stop-color="#0E1729"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Geometric Symbol -->
+  <g transform="translate(2, 2)">
+    <rect x="0" y="0" width="48" height="48" rx="12" fill="url(#ldNavyGrad)" stroke="#C6A15B" stroke-width="1.5" stroke-opacity="0.4"/>
+    <rect x="13" y="12" width="5.5" height="24" rx="2.5" fill="#FFFFFF"/>
+    <path d="M18.5 12H27C31.4183 12 35 15.5817 35 20C35 24.4183 31.4183 28 27 28H18.5V22.5H26.5C27.8807 22.5 29 21.3807 29 20C29 18.6193 27.8807 17.5 26.5 17.5H18.5V12Z" fill="url(#ldGoldGrad)"/>
+    <circle cx="23.5" cy="20" r="2.2" fill="#FFFFFF"/>
+    <path d="M13 28.5L18.5 34V28.5H13Z" fill="url(#ldGoldGrad)" opacity="0.9"/>
+  </g>
+
+  <!-- PIVO Wordmark -->
+  <text x="62" y="32" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif" font-size="24" font-weight="800" letter-spacing="1.5" fill="#FFFFFF">PIVO</text>
+
+  <!-- TECH Wordmark -->
+  <text x="136" y="32" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif" font-size="24" font-weight="700" letter-spacing="2" fill="url(#ldGoldGrad)">TECH</text>
+
+  <!-- Tagline underneath -->
+  <text x="63" y="44" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif" font-size="7.5" font-weight="600" letter-spacing="2.8" fill="#94A3B8">BUILD. GROW. AUTOMATE.</text>
+</svg>

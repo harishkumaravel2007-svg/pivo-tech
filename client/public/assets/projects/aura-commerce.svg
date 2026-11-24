@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" fill="none">
+  <defs>
+    <linearGradient id="aBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0E1626"/>
+      <stop offset="100%" stop-color="#141E33"/>
+    </linearGradient>
+    <linearGradient id="aGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E5C378"/>
+      <stop offset="100%" stop-color="#C6A15B"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="500" fill="url(#aBg)"/>
+
+  <g transform="translate(60, 50)">
+    <rect width="680" height="400" rx="12" fill="#121C30" stroke="#25355B" stroke-width="1.5"/>
+    <rect width="680" height="40" rx="12" fill="#0A101C"/>
+    <circle cx="25" cy="20" r="5" fill="#EF4444"/>
+    <circle cx="45" cy="20" r="5" fill="#F59E0B"/>
+    <circle cx="65" cy="20" r="5" fill="#10B981"/>
+    <rect x="90" y="10" width="280" height="20" rx="6" fill="#1A2744"/>
+    <text x="105" y="24" fill="#64748B" font-family="monospace" font-size="10">https://aura-lifestyle.store</text>
+
+    <!-- Product Grid Mockup -->
+    <rect x="30" y="65" width="140" height="20" rx="4" fill="#FFFFFF"/>
+    <rect x="520" y="65" width="130" height="20" rx="6" fill="url(#aGold)"/>
+
+    <!-- Products -->
+    <rect x="30" y="105" width="195" height="150" rx="8" fill="#192642"/>
+    <rect x="45" y="120" width="165" height="85" rx="6" fill="#243456"/>
+    <rect x="45" y="215" width="100" height="12" rx="3" fill="#FFFFFF"/>
+    <rect x="45" y="235" width="50" height="10" rx="2" fill="url(#aGold)"/>
+
+    <rect x="242" y="105" width="195" height="150" rx="8" fill="#192642"/>
+    <rect x="257" y="120" width="165" height="85" rx="6" fill="#243456"/>
+    <rect x="257" y="215" width="120" height="12" rx="3" fill="#FFFFFF"/>
+    <rect x="257" y="235" width="60" height="10" rx="2" fill="url(#aGold)"/>
+
+    <rect x="455" y="105" width="195" height="150" rx="8" fill="#192642"/>
+    <rect x="470" y="120" width="165" height="85" rx="6" fill="#243456"/>
+    <rect x="470" y="215" width="90" height="12" rx="3" fill="#FFFFFF"/>
+    <rect x="470" y="235" width="55" height="10" rx="2" fill="url(#aGold)"/>
+
+    <!-- Lower Checkout / Feature strip -->
+    <rect x="30" y="280" width="620" height="90" rx="8" fill="#16223B" stroke="#25355B" stroke-width="1"/>
+    <rect x="55" y="305" width="220" height="18" rx="4" fill="#FFFFFF"/>
+    <rect x="55" y="332" width="300" height="12" rx="3" fill="#64748B"/>
+    <rect x="480" y="305" width="145" height="40" rx="8" fill="url(#aGold)"/>
+  </g>
+
+  <!-- Concept Demo Ribbon -->
+  <g transform="translate(620, 20)">
+    <rect width="150" height="26" rx="6" fill="#101B33" stroke="url(#aGold)" stroke-width="1"/>
+    <text x="75" y="17" fill="#E5C378" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" text-anchor="middle" letter-spacing="0.5">CONCEPT DEMO</text>
+  </g>
+</svg>

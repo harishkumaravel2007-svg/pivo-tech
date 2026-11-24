@@ -1,0 +1,80 @@
+<svg width="800" height="520" viewBox="0 0 800 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="wfBg" x1="0" y1="0" x2="800" y2="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#080D1A" />
+      <stop offset="100%" stop-color="#111B34" />
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="520" rx="16" fill="url(#wfBg)" />
+  
+  <rect width="100%" height="40" fill="#0C1426" rx="16" />
+  <circle cx="24" cy="20" r="5" fill="#FF5F56" />
+  <circle cx="40" cy="20" r="5" fill="#FFBD2E" />
+  <circle cx="56" cy="20" r="5" fill="#27C93F" />
+  <rect x="80" y="10" width="400" height="20" rx="6" fill="#152342" />
+  <text x="280" y="24" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" text-anchor="middle">PIVO TECH Automated Business Logic & Multi-System Hook Flow</text>
+  <circle cx="760" cy="20" r="3" fill="#C6A15B" />
+
+
+  <g transform="translate(50, 70)">
+    <text x="0" y="20" fill="#FFFFFF" font-family="sans-serif" font-size="18" font-weight="800">Visual Business Logic Canvas</text>
+    <text x="0" y="40" fill="#94A3B8" font-family="sans-serif" font-size="11">Bespoke integration linking Webhooks, ERP, WhatsApp, Razorpay, and Email pipelines.</text>
+
+    <!-- Steps Layout -->
+    <!-- STEP 1 -->
+    <g transform="translate(0, 70)">
+      <rect width="180" height="110" rx="12" fill="#152342" stroke="#38BDF8" stroke-width="1.5" />
+      <circle cx="25" cy="25" r="10" fill="#38BDF8" fill-opacity="0.2" />
+      <text x="25" y="29" fill="#38BDF8" font-family="sans-serif" font-size="11" font-weight="bold" text-anchor="middle">1</text>
+      <text x="45" y="28" fill="#FFFFFF" font-family="sans-serif" font-size="12" font-weight="bold">Inquiry Form Ingestion</text>
+      <text x="15" y="55" fill="#CBD5E1" font-family="sans-serif" font-size="10">Web submission arrives.</text>
+      <text x="15" y="70" fill="#94A3B8" font-family="sans-serif" font-size="10">Payload sanitized &amp; parsed.</text>
+      <text x="15" y="92" fill="#22C55E" font-family="sans-serif" font-size="9">✓ 100% Guaranteed Delivery</text>
+    </g>
+
+    <!-- Arrow 1 to 2 -->
+    <path d="M 180 125 L 260 125" stroke="#C6A15B" stroke-width="2" />
+    <polygon points="260,121 268,125 260,129" fill="#C6A15B" />
+
+    <!-- STEP 2 -->
+    <g transform="translate(268, 70)">
+      <rect width="180" height="110" rx="12" fill="#152342" stroke="#C6A15B" stroke-width="2" />
+      <circle cx="25" cy="25" r="10" fill="#C6A15B" fill-opacity="0.2" />
+      <text x="25" y="29" fill="#C6A15B" font-family="sans-serif" font-size="11" font-weight="bold" text-anchor="middle">2</text>
+      <text x="45" y="28" fill="#FFFFFF" font-family="sans-serif" font-size="12" font-weight="bold">Smart Deduplication</text>
+      <text x="15" y="55" fill="#CBD5E1" font-family="sans-serif" font-size="10">Anti-spam check against DB.</text>
+      <text x="15" y="70" fill="#94A3B8" font-family="sans-serif" font-size="10">Enrich client phone &amp; email.</text>
+      <text x="15" y="92" fill="#E5C378" font-family="sans-serif" font-size="9">✓ Zero duplicate spam</text>
+    </g>
+
+    <!-- Arrow 2 to 3 -->
+    <path d="M 448 125 L 528 125" stroke="#C6A15B" stroke-width="2" />
+    <polygon points="528,121 536,125 528,129" fill="#C6A15B" />
+
+    <!-- STEP 3 -->
+    <g transform="translate(536, 70)">
+      <rect width="180" height="110" rx="12" fill="#152342" stroke="#22C55E" stroke-width="1.5" />
+      <circle cx="25" cy="25" r="10" fill="#22C55E" fill-opacity="0.2" />
+      <text x="25" y="29" fill="#22C55E" font-family="sans-serif" font-size="11" font-weight="bold" text-anchor="middle">3</text>
+      <text x="45" y="28" fill="#FFFFFF" font-family="sans-serif" font-size="12" font-weight="bold">Multi-Channel Dispatch</text>
+      <text x="15" y="55" fill="#CBD5E1" font-family="sans-serif" font-size="10">• Instant WhatsApp to Founder</text>
+      <text x="15" y="70" fill="#CBD5E1" font-family="sans-serif" font-size="10">• Auto-acknowledgment email</text>
+      <text x="15" y="92" fill="#22C55E" font-family="sans-serif" font-size="9">✓ Sent in &lt; 800ms</text>
+    </g>
+
+    <!-- LOWER CARD: Live Trigger Inspector -->
+    <g transform="translate(0, 210)">
+      <rect width="716" height="180" rx="14" fill="#0C1426" stroke="#253556" stroke-width="1" />
+      <rect x="0" y="0" width="716" height="32" rx="14" fill="#152342" />
+      <text x="20" y="21" fill="#FFFFFF" font-family="sans-serif" font-size="11" font-weight="bold">LIVE AUTOMATION EXECUTION LOG</text>
+
+      <!-- Code Log Lines -->
+      <text x="20" y="58" fill="#22C55E" font-family="monospace" font-size="11">[2026-11-24 04:30:12] [TRIGGER] POST /api/enquiries/submit received from client (Theni, TN)</text>
+      <text x="20" y="78" fill="#38BDF8" font-family="monospace" font-size="11">[2026-11-24 04:30:12] [VALIDATION] Token verified • Honeypot check: PASSED • Math challenge: 7/7</text>
+      <text x="20" y="98" fill="#E5C378" font-family="monospace" font-size="11">[2026-11-24 04:30:13] [DB_INSERT] Persisted enquiry #1042 into SQLite database</text>
+      <text x="20" y="118" fill="#22C55E" font-family="monospace" font-size="11">[2026-11-24 04:30:13] [WHATSAPP_DISPATCH] Sent high-priority ping to Founder Harish K (+91 99442 45043)</text>
+      <text x="20" y="138" fill="#94A3B8" font-family="monospace" font-size="11">[2026-11-24 04:30:13] [STATUS: 200 OK] Response returned to browser in 218ms</text>
+    </g>
+  </g>
+</svg>

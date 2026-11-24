@@ -1,0 +1,89 @@
+<svg width="800" height="520" viewBox="0 0 800 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="aiBg1" x1="0" y1="0" x2="800" y2="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#080E1A" />
+      <stop offset="100%" stop-color="#101B33" />
+    </linearGradient>
+    <linearGradient id="aiGold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E5C378" />
+      <stop offset="100%" stop-color="#C6A15B" />
+    </linearGradient>
+    <linearGradient id="agentBubble" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1A2846" />
+      <stop offset="100%" stop-color="#14213D" />
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="520" rx="16" fill="url(#aiBg1)" />
+  
+  <rect width="100%" height="40" fill="#0C1426" rx="16" />
+  <circle cx="24" cy="20" r="5" fill="#FF5F56" />
+  <circle cx="40" cy="20" r="5" fill="#FFBD2E" />
+  <circle cx="56" cy="20" r="5" fill="#27C93F" />
+  <rect x="80" y="10" width="400" height="20" rx="6" fill="#152342" />
+  <text x="280" y="24" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" text-anchor="middle">PIVO TECH Autonomous Conversational AI Assistant — Live Session</text>
+  <circle cx="760" cy="20" r="3" fill="#C6A15B" />
+
+
+  <!-- Ambient Neural Glow -->
+  <circle cx="400" cy="260" r="180" fill="#2563EB" fill-opacity="0.08" filter="blur(60px)" />
+  <circle cx="580" cy="300" r="140" fill="#C6A15B" fill-opacity="0.06" filter="blur(50px)" />
+
+  <!-- Chat Container -->
+  <g transform="translate(100, 60)">
+    <rect width="600" height="420" rx="16" fill="#0C1426" stroke="#253556" stroke-width="1.5" />
+
+    <!-- Chat Header -->
+    <rect x="0" y="0" width="600" height="65" rx="16" fill="#152342" />
+    <circle cx="40" cy="32" r="18" fill="#101B33" stroke="#C6A15B" stroke-width="2" />
+    <text x="40" y="37" fill="#C6A15B" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">AI</text>
+    <circle cx="52" cy="44" r="5" fill="#22C55E" />
+    <text x="70" y="28" fill="#FFFFFF" font-family="sans-serif" font-size="14" font-weight="bold">PIVO TECH Enterprise Assistant</text>
+    <text x="70" y="46" fill="#94A3B8" font-family="sans-serif" font-size="11">Trained on Custom Enterprise Knowledge • 24/7 Active • 0.3s Latency</text>
+    <rect x="490" y="20" width="90" height="26" rx="6" fill="#22C55E" fill-opacity="0.15" stroke="#22C55E" stroke-width="1" />
+    <text x="535" y="37" fill="#22C55E" font-family="sans-serif" font-size="10" font-weight="bold" text-anchor="middle">ONLINE</text>
+
+    <!-- Message 1: User -->
+    <g transform="translate(180, 85)">
+      <rect width="395" height="46" rx="12" fill="#2563EB" />
+      <text x="16" y="20" fill="#FFFFFF" font-family="sans-serif" font-size="12" font-weight="500">How can PIVO TECH automate our customer support &amp; WhatsApp inquiries?</text>
+      <text x="16" y="36" fill="#BFDBFE" font-family="sans-serif" font-size="10">Delivered 10:42 AM</text>
+    </g>
+
+    <!-- Message 2: Agent -->
+    <g transform="translate(25, 145)">
+      <rect width="550" height="130" rx="12" fill="url(#agentBubble)" stroke="#334155" stroke-width="1" />
+      <circle cx="24" cy="24" r="10" fill="#C6A15B" fill-opacity="0.2" />
+      <text x="24" y="28" fill="#E5C378" font-family="sans-serif" font-size="10" font-weight="bold" text-anchor="middle">⚡</text>
+      <text x="42" y="24" fill="#C6A15B" font-family="sans-serif" font-size="11" font-weight="bold">OmniAssist AI Engine</text>
+      <text x="475" y="24" fill="#94A3B8" font-family="sans-serif" font-size="10">99.8% Confidence</text>
+
+      <text x="20" y="52" fill="#F1F5F9" font-family="sans-serif" font-size="12" font-weight="normal">
+        We deploy an autonomous AI agent integrated directly with your WhatsApp Business API &amp; CRM:
+      </text>
+      <text x="20" y="74" fill="#CBD5E1" font-family="sans-serif" font-size="11">✓ Instant 24/7 lead qualification &amp; natural language answering in seconds.</text>
+      <text x="20" y="94" fill="#CBD5E1" font-family="sans-serif" font-size="11">✓ Automatic appointment booking synced with Google Calendar / Outlook.</text>
+      <text x="20" y="114" fill="#CBD5E1" font-family="sans-serif" font-size="11">✓ Seamless human handoff to Founder Harish K or staff when escalation is needed.</text>
+    </g>
+
+    <!-- Interactive Action Pills -->
+    <g transform="translate(25, 290)">
+      <rect x="0" y="0" width="160" height="30" rx="15" fill="#152342" stroke="#C6A15B" stroke-width="1" />
+      <text x="80" y="19" fill="#E5C378" font-family="sans-serif" font-size="11" font-weight="600" text-anchor="middle">Schedule Live Demo →</text>
+
+      <rect x="175" y="0" width="170" height="30" rx="15" fill="#152342" stroke="#334155" stroke-width="1" />
+      <text x="260" y="19" fill="#94A3B8" font-family="sans-serif" font-size="11" font-weight="600" text-anchor="middle">Explore WhatsApp Agent</text>
+
+      <rect x="360" y="0" width="140" height="30" rx="15" fill="#152342" stroke="#334155" stroke-width="1" />
+      <text x="430" y="19" fill="#94A3B8" font-family="sans-serif" font-size="11" font-weight="600" text-anchor="middle">View Security Rules</text>
+    </g>
+
+    <!-- Input Bar -->
+    <g transform="translate(25, 345)">
+      <rect width="550" height="50" rx="12" fill="#152342" stroke="#334155" stroke-width="1" />
+      <text x="20" y="30" fill="#64748B" font-family="sans-serif" font-size="12">Type a question or business scenario...</text>
+      <rect x="470" y="8" width="70" height="34" rx="8" fill="url(#aiGold)" />
+      <text x="505" y="29" fill="#0C1426" font-family="sans-serif" font-size="11" font-weight="bold" text-anchor="middle">Send ↵</text>
+    </g>
+  </g>
+</svg>

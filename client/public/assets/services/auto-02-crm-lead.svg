@@ -1,0 +1,90 @@
+<svg width="800" height="520" viewBox="0 0 800 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="crmBg" x1="0" y1="0" x2="800" y2="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0A1124" />
+      <stop offset="100%" stop-color="#101B33" />
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="520" rx="16" fill="url(#crmBg)" />
+  
+  <rect width="100%" height="40" fill="#0C1426" rx="16" />
+  <circle cx="24" cy="20" r="5" fill="#FF5F56" />
+  <circle cx="40" cy="20" r="5" fill="#FFBD2E" />
+  <circle cx="56" cy="20" r="5" fill="#27C93F" />
+  <rect x="80" y="10" width="400" height="20" rx="6" fill="#152342" />
+  <text x="280" y="24" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" text-anchor="middle">PIVO TECH Automated CRM Lead Pipeline & Conversion Engine</text>
+  <circle cx="760" cy="20" r="3" fill="#C6A15B" />
+
+
+  <text x="40" y="70" fill="#FFFFFF" font-family="sans-serif" font-size="18" font-weight="800">Automated Pipeline Kanban</text>
+  <text x="40" y="90" fill="#94A3B8" font-family="sans-serif" font-size="11">Zero leads lost: Instant auto-routing, SLA timers, and automated WhatsApp follow-ups.</text>
+
+  <!-- Kanban Column 1: New Leads -->
+  <g transform="translate(40, 110)">
+    <rect width="165" height="370" rx="10" fill="#131F38" stroke="#253556" stroke-width="1" />
+    <rect x="10" y="10" width="145" height="24" rx="6" fill="#1E293B" />
+    <text x="20" y="26" fill="#38BDF8" font-family="sans-serif" font-size="11" font-weight="bold">NEW INQUIRY (4)</text>
+
+    <!-- Card 1 -->
+    <rect x="10" y="44" width="145" height="90" rx="8" fill="#1A2846" stroke="#334155" stroke-width="1" />
+    <text x="18" y="62" fill="#FFFFFF" font-family="sans-serif" font-size="11" font-weight="bold">Vertex Retail Group</text>
+    <text x="18" y="78" fill="#94A3B8" font-family="sans-serif" font-size="10">E-Commerce Web Portal</text>
+    <text x="18" y="96" fill="#C6A15B" font-family="sans-serif" font-size="10" font-weight="bold">Budget: ₹3,50,000</text>
+    <rect x="18" y="106" width="75" height="18" rx="4" fill="#22C55E" fill-opacity="0.2" />
+    <text x="55" y="118" fill="#22C55E" font-family="sans-serif" font-size="8" font-weight="bold" text-anchor="middle">Auto-Responded</text>
+
+    <!-- Card 2 -->
+    <rect x="10" y="145" width="145" height="90" rx="8" fill="#1A2846" stroke="#334155" stroke-width="1" />
+    <text x="18" y="163" fill="#FFFFFF" font-family="sans-serif" font-size="11" font-weight="bold">Nova Health Clinic</text>
+    <text x="18" y="179" fill="#94A3B8" font-family="sans-serif" font-size="10">Booking Automation</text>
+    <text x="18" y="197" fill="#C6A15B" font-family="sans-serif" font-size="10" font-weight="bold">Budget: ₹1,80,000</text>
+    <rect x="18" y="207" width="70" height="18" rx="4" fill="#38BDF8" fill-opacity="0.2" />
+    <text x="53" y="219" fill="#38BDF8" font-family="sans-serif" font-size="8" font-weight="bold" text-anchor="middle">WhatsApp Live</text>
+  </g>
+
+  <!-- Kanban Column 2: Qualified & Discovery -->
+  <g transform="translate(225, 110)">
+    <rect width="165" height="370" rx="10" fill="#131F38" stroke="#253556" stroke-width="1" />
+    <rect x="10" y="10" width="145" height="24" rx="6" fill="#1E293B" />
+    <text x="20" y="26" fill="#F59E0B" font-family="sans-serif" font-size="11" font-weight="bold">QUALIFIED (6)</text>
+
+    <!-- Card 1 -->
+    <rect x="10" y="44" width="145" height="95" rx="8" fill="#1A2846" stroke="#C6A15B" stroke-width="1.5" />
+    <text x="18" y="62" fill="#FFFFFF" font-family="sans-serif" font-size="11" font-weight="bold">Skyline Logistics</text>
+    <text x="18" y="78" fill="#94A3B8" font-family="sans-serif" font-size="10">Fleet ERP Solution</text>
+    <text x="18" y="96" fill="#C6A15B" font-family="sans-serif" font-size="10" font-weight="bold">Budget: ₹6,00,000</text>
+    <rect x="18" y="108" width="100" height="18" rx="4" fill="#C6A15B" fill-opacity="0.2" />
+    <text x="68" y="120" fill="#E5C378" font-family="sans-serif" font-size="8" font-weight="bold" text-anchor="middle">Call Set: Today 4 PM</text>
+  </g>
+
+  <!-- Kanban Column 3: Proposal Sent -->
+  <g transform="translate(410, 110)">
+    <rect width="165" height="370" rx="10" fill="#131F38" stroke="#253556" stroke-width="1" />
+    <rect x="10" y="10" width="145" height="24" rx="6" fill="#1E293B" />
+    <text x="20" y="26" fill="#C6A15B" font-family="sans-serif" font-size="11" font-weight="bold">PROPOSAL SENT (3)</text>
+
+    <!-- Card 1 -->
+    <rect x="10" y="44" width="145" height="95" rx="8" fill="#1A2846" stroke="#334155" stroke-width="1" />
+    <text x="18" y="62" fill="#FFFFFF" font-family="sans-serif" font-size="11" font-weight="bold">Zenith Capital</text>
+    <text x="18" y="78" fill="#94A3B8" font-family="sans-serif" font-size="10">Corporate Portal + AI</text>
+    <text x="18" y="96" fill="#C6A15B" font-family="sans-serif" font-size="10" font-weight="bold">Scope: Final Review</text>
+    <rect x="18" y="108" width="90" height="18" rx="4" fill="#22C55E" fill-opacity="0.2" />
+    <text x="63" y="120" fill="#22C55E" font-family="sans-serif" font-size="8" font-weight="bold" text-anchor="middle">Auto-Followup in 2d</text>
+  </g>
+
+  <!-- Kanban Column 4: Won / Contract Signed -->
+  <g transform="translate(595, 110)">
+    <rect width="165" height="370" rx="10" fill="#131F38" stroke="#253556" stroke-width="1" />
+    <rect x="10" y="10" width="145" height="24" rx="6" fill="#1E293B" />
+    <text x="20" y="26" fill="#22C55E" font-family="sans-serif" font-size="11" font-weight="bold">WON / SIGNED (12)</text>
+
+    <!-- Card 1 -->
+    <rect x="10" y="44" width="145" height="95" rx="8" fill="#1A2846" stroke="#22C55E" stroke-width="1.5" />
+    <text x="18" y="62" fill="#FFFFFF" font-family="sans-serif" font-size="11" font-weight="bold">Apex Fleet Dynamics</text>
+    <text x="18" y="78" fill="#94A3B8" font-family="sans-serif" font-size="10">Live In Production</text>
+    <text x="18" y="96" fill="#22C55E" font-family="sans-serif" font-size="10" font-weight="bold">✓ 5-Star Verified</text>
+    <rect x="18" y="108" width="95" height="18" rx="4" fill="#101B33" stroke="#C6A15B" stroke-width="1" />
+    <text x="65" y="120" fill="#FFFFFF" font-family="sans-serif" font-size="8" font-weight="bold" text-anchor="middle">View Case Study</text>
+  </g>
+</svg>

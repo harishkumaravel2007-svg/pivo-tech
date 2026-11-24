@@ -1,0 +1,96 @@
+<svg width="800" height="520" viewBox="0 0 800 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="flowBg" x1="0" y1="0" x2="800" y2="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0A1020" />
+      <stop offset="100%" stop-color="#121D38" />
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="520" rx="16" fill="url(#flowBg)" />
+  
+  <rect width="100%" height="40" fill="#0C1426" rx="16" />
+  <circle cx="24" cy="20" r="5" fill="#FF5F56" />
+  <circle cx="40" cy="20" r="5" fill="#FFBD2E" />
+  <circle cx="56" cy="20" r="5" fill="#27C93F" />
+  <rect x="80" y="10" width="400" height="20" rx="6" fill="#152342" />
+  <text x="280" y="24" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" text-anchor="middle">PIVO TECH Autonomous Agent Orchestration Pipeline — Node Graph</text>
+  <circle cx="760" cy="20" r="3" fill="#C6A15B" />
+
+
+  <!-- Pipeline Canvas -->
+  <g transform="translate(40, 70)">
+    <!-- Canvas Grid Dots -->
+    <circle cx="100" cy="50" r="1.5" fill="#334155" />
+    <circle cx="200" cy="50" r="1.5" fill="#334155" />
+    <circle cx="300" cy="50" r="1.5" fill="#334155" />
+    <circle cx="400" cy="50" r="1.5" fill="#334155" />
+    <circle cx="500" cy="50" r="1.5" fill="#334155" />
+    <circle cx="600" cy="50" r="1.5" fill="#334155" />
+
+    <!-- Connecting Path 1 to 2 -->
+    <path d="M 180 120 L 270 120" stroke="#C6A15B" stroke-width="3" stroke-dasharray="6 4" />
+    <circle cx="225" cy="120" r="4" fill="#C6A15B" />
+
+    <!-- Connecting Path 2 to 3 (Split Top) -->
+    <path d="M 430 120 C 470 120 480 60 520 60" stroke="#38BDF8" stroke-width="2.5" fill="none" />
+    <!-- Connecting Path 2 to 4 (Split Bottom) -->
+    <path d="M 430 120 C 470 120 480 200 520 200" stroke="#22C55E" stroke-width="2.5" fill="none" />
+
+    <!-- Connecting Path 3 & 4 to Final Notification -->
+    <path d="M 670 60 C 690 60 700 120 710 120" stroke="#94A3B8" stroke-width="2" fill="none" />
+    <path d="M 670 200 C 690 200 700 120 710 120" stroke="#94A3B8" stroke-width="2" fill="none" />
+
+    <!-- NODE 1: Inbound Webhook Trigger -->
+    <g transform="translate(20, 70)">
+      <rect width="160" height="100" rx="12" fill="#152342" stroke="#38BDF8" stroke-width="2" />
+      <rect x="0" y="0" width="160" height="26" rx="12" fill="#0C1426" />
+      <text x="12" y="17" fill="#38BDF8" font-family="sans-serif" font-size="10" font-weight="bold">TRIGGER</text>
+      <text x="12" y="48" fill="#FFFFFF" font-family="sans-serif" font-size="12" font-weight="bold">Customer Message</text>
+      <text x="12" y="66" fill="#94A3B8" font-family="sans-serif" font-size="10">WhatsApp / Web Form</text>
+      <text x="12" y="85" fill="#22C55E" font-family="sans-serif" font-size="9 font-weight="bold">● Real-time webhook</text>
+    </g>
+
+    <!-- NODE 2: LLM Intent & Agent Reasoning -->
+    <g transform="translate(270, 60)">
+      <rect width="160" height="120" rx="12" fill="#152342" stroke="#C6A15B" stroke-width="2" />
+      <rect x="0" y="0" width="160" height="26" rx="12" fill="#0C1426" />
+      <text x="12" y="17" fill="#C6A15B" font-family="sans-serif" font-size="10" font-weight="bold">AI AGENT ENGINE</text>
+      <text x="12" y="48" fill="#FFFFFF" font-family="sans-serif" font-size="12" font-weight="bold">Intent Classification</text>
+      <text x="12" y="66" fill="#94A3B8" font-family="sans-serif" font-size="10">• Sentiment Analysis</text>
+      <text x="12" y="82" fill="#94A3B8" font-family="sans-serif" font-size="10">• Budget Qualification</text>
+      <text x="12" y="102" fill="#E5C378" font-family="sans-serif" font-size="9">PIVO Agent Orchestrator</text>
+    </g>
+
+    <!-- NODE 3: High Value Lead Branch -->
+    <g transform="translate(520, 10)">
+      <rect width="150" height="90" rx="12" fill="#152342" stroke="#38BDF8" stroke-width="1.5" />
+      <rect x="0" y="0" width="150" height="24" rx="12" fill="#0C1426" />
+      <text x="12" y="16" fill="#38BDF8" font-family="sans-serif" font-size="9" font-weight="bold">HIGH-PRIORITY BRANCH</text>
+      <text x="12" y="44" fill="#FFFFFF" font-family="sans-serif" font-size="11" font-weight="bold">VIP Client Routing</text>
+      <text x="12" y="62" fill="#94A3B8" font-family="sans-serif" font-size="10">Alert Harish K Direct</text>
+      <text x="12" y="78" fill="#38BDF8" font-family="sans-serif" font-size="9">Telegram &amp; WhatsApp</text>
+    </g>
+
+    <!-- NODE 4: Standard Autonomous Resolution -->
+    <g transform="translate(520, 150)">
+      <rect width="150" height="90" rx="12" fill="#152342" stroke="#22C55E" stroke-width="1.5" />
+      <rect x="0" y="0" width="150" height="24" rx="12" fill="#0C1426" />
+      <text x="12" y="16" fill="#22C55E" font-family="sans-serif" font-size="9" font-weight="bold">STANDARD BRANCH</text>
+      <text x="12" y="44" fill="#FFFFFF" font-family="sans-serif" font-size="11" font-weight="bold">Auto Resolution</text>
+      <text x="12" y="62" fill="#94A3B8" font-family="sans-serif" font-size="10">Send Pricing Guide</text>
+      <text x="12" y="78" fill="#22C55E" font-family="sans-serif" font-size="9">Log to SQLite CRM</text>
+    </g>
+  </g>
+
+  <!-- Lower Output Status Bar -->
+  <g transform="translate(40, 370)">
+    <rect width="720" height="100" rx="14" fill="#0E172C" stroke="#253556" stroke-width="1" />
+    <text x="25" y="30" fill="#FFFFFF" font-family="sans-serif" font-size="14" font-weight="bold">Enterprise Workflow Diagnostics</text>
+    <text x="25" y="50" fill="#94A3B8" font-family="sans-serif" font-size="11">Total executions today: 2,419 • Error rate: 0.00% • Peak latency: 310ms</text>
+
+    <!-- Progress indicator bar -->
+    <rect x="25" y="68" width="670" height="10" rx="5" fill="#1E293B" />
+    <rect x="25" y="68" width="580" height="10" rx="5" fill="#C6A15B" />
+    <text x="640" y="60" fill="#E5C378" font-family="sans-serif" font-size="10" font-weight="bold">99.8% Healthy</text>
+  </g>
+</svg>
