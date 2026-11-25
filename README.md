@@ -128,6 +128,19 @@ The website includes a private administration portal accessible at:
 
 ## 6. Production Deployment Guide
 
+### Cloudflare Pages Deployment (Frontend SPA)
+If deploying the frontend on **Cloudflare Pages**:
+1. Go to Cloudflare Dashboard → **Workers & Pages** → **Create application** → **Pages** → **Connect to Git**.
+2. Select your repository: `harishkumaravel2007-svg/pivo-tech`.
+3. Configure the build settings:
+   - **Framework preset:** `Vite`
+   - **Build command:** `npm run build`
+   - **Build output directory:** `client/dist`
+   - **Root directory:** `/`
+4. In **Environment variables (advanced)**, add:
+   - `NODE_VERSION` = `20`
+5. Click **Save and Deploy**. Cloudflare Pages will run `npm install` (resolving the monorepo workspaces) and compile the Vite + React application with client-side SPA routing (`_redirects`).
+
 ### Deployment on VPS (DigitalOcean / Linode / AWS EC2 / Hetzner)
 1. Install Node.js v24 on your server:
    ```bash
