@@ -128,18 +128,24 @@ The website includes a private administration portal accessible at:
 
 ## 6. Production Deployment Guide
 
-### Cloudflare Pages Deployment (Frontend SPA)
-If deploying the frontend on **Cloudflare Pages**:
-1. Go to Cloudflare Dashboard → **Workers & Pages** → **Create application** → **Pages** → **Connect to Git**.
-2. Select your repository: `harishkumaravel2007-svg/pivo-tech`.
-3. Configure the build settings:
+### Cloudflare Pages Deployment (Frontend React + Vite SPA)
+> **CRITICAL:** Do NOT create this project under Cloudflare **Workers** or **Workers Builds**. Workers CI will attempt to execute `npx wrangler deploy` (which is for serverless functions, not static sites). Use **Cloudflare Pages** directly:
+
+1. In the Cloudflare Dashboard, navigate to **Compute (Workers) > Workers & Pages**.
+2. Click **Create** (or **Create application**).
+3. Select the **Pages** tab at the top (do **NOT** stay on the default Workers tab).
+4. Click **Connect to Git** and choose your repository: `harishkumaravel2007-svg/pivo-tech`.
+5. Enter the exact build configuration:
+   - **Project name:** `pivo-tech`
+   - **Production branch:** `main`
    - **Framework preset:** `Vite`
    - **Build command:** `npm run build`
    - **Build output directory:** `client/dist`
-   - **Root directory:** `/`
-4. In **Environment variables (advanced)**, add:
+   - **Root directory:** `/` *(leave as repository root)*
+6. Under **Environment variables (advanced)**, add:
    - `NODE_VERSION` = `20`
-5. Click **Save and Deploy**. Cloudflare Pages will run `npm install` (resolving the monorepo workspaces) and compile the Vite + React application with client-side SPA routing (`_redirects`).
+   - `VITE_API_URL` = *(Your backend API URL, or leave blank if running on the same domain)*
+7. Click **Save and Deploy**. Cloudflare Pages will execute `npm run build` (`tsc -b && vite build`) and directly publish `client/dist` with `_redirects` and `_headers` without invoking Wrangler.
 
 ### Deployment on VPS (DigitalOcean / Linode / AWS EC2 / Hetzner)
 1. Install Node.js v24 on your server:
