@@ -25,9 +25,9 @@ export const Portfolio: React.FC = () => {
     'All',
     'Business Websites',
     'E-commerce',
-    'AI Solutions',
     'Web Applications',
-    'Automation Systems'
+    'AI Solutions',
+    'Business Automation'
   ];
 
   useEffect(() => {
@@ -111,7 +111,12 @@ export const Portfolio: React.FC = () => {
                     <span className="absolute top-3 right-3 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase bg-[#101B33]/90 text-[#E5C378] border border-[#C6A15B]/40 backdrop-blur-sm">
                       Demo Concept
                     </span>
-                  ) : null}
+                  ) : (
+                    <span className="absolute top-3 right-3 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-emerald-600 text-white shadow-md flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Verified Client Project
+                    </span>
+                  )}
                 </div>
 
                 {/* Body Content */}
@@ -138,7 +143,12 @@ export const Portfolio: React.FC = () => {
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-600 shrink-0" />
                         <span><strong>Portfolio Demo:</strong> Architecture &amp; design concept. Not a real client project.</span>
                       </div>
-                    ) : null}
+                    ) : (
+                      <div className="mb-3 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px] text-emerald-900 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                        <span><strong>Live Client Deployment:</strong> Delivered for Sri Balaji Stationery, Sowcarpet, Chennai.</span>
+                      </div>
+                    )}
 
                     <p className="text-slate-600 text-sm leading-relaxed mb-6 line-clamp-3">
                       {project.description}
@@ -156,39 +166,53 @@ export const Portfolio: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <button
-                      onClick={() => setSelectedProject(project)}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#101B33] hover:text-[#C6A15B] transition-colors"
-                    >
-                      <span>View Case Study</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
+                  <div>
+                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                      <button
+                        onClick={() => setSelectedProject(project)}
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-[#101B33] hover:text-[#C6A15B] transition-colors"
+                      >
+                        <span>View Details</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
 
-                    <div className="flex items-center gap-2">
-                      {project.github_url && (
-                        <a
-                          href={project.github_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-                          title="View Source on GitHub"
-                        >
-                          <Github className="w-4 h-4" />
-                        </a>
-                      )}
-                      {project.live_url && (
-                        <a
-                          href={project.live_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-[#C6A15B] hover:bg-slate-100 transition-colors"
-                          title="Live Preview"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {project.github_url && (
+                          <a
+                            href={project.github_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+                            title="View Source on GitHub"
+                          >
+                            <Github className="w-4 h-4" />
+                          </a>
+                        )}
+                        {project.live_url && (
+                          <a
+                            href={project.live_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-[#C6A15B] hover:bg-slate-100 transition-colors"
+                            title="Live Preview"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        )}
+                      </div>
                     </div>
+
+                    <a
+                      href={`https://wa.me/919944245043?text=${encodeURIComponent(
+                        `Hi Harish, I saw your ${project.name} (${project.category}) project on PIVO TECH and would like to build a similar solution for my business.`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full mt-3 py-2 px-3 rounded-xl bg-[#101B33] text-white hover:bg-[#C6A15B] hover:text-[#101B33] text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                    >
+                      <span>Request Similar Solution</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </a>
                   </div>
                 </div>
               </div>
@@ -279,7 +303,7 @@ export const Portfolio: React.FC = () => {
             </div>
 
             <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 {selectedProject.live_url && (
                   <a
                     href={selectedProject.live_url}
@@ -287,10 +311,20 @@ export const Portfolio: React.FC = () => {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[#C6A15B] text-[#101B33] hover:bg-[#D4AF37] transition-colors"
                   >
-                    <span>Visit Live Project</span>
+                    <span>Visit Live Website</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 )}
+                <a
+                  href={`https://wa.me/919944245043?text=${encodeURIComponent(
+                    `Hi Harish, I would like to discuss a project similar to ${selectedProject.name} (${selectedProject.category}) for my company.`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm"
+                >
+                  <span>Chat on WhatsApp</span>
+                </a>
                 {selectedProject.github_url && (
                   <a
                     href={selectedProject.github_url}
@@ -308,7 +342,7 @@ export const Portfolio: React.FC = () => {
                 to={`/contact?service=${encodeURIComponent(selectedProject.category)}`}
                 className="text-xs font-semibold text-[#101B33] hover:text-[#C6A15B] transition-colors"
               >
-                Commission a similar project &rarr;
+                Request official proposal &rarr;
               </Link>
             </div>
           </div>

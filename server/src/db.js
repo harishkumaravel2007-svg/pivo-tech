@@ -183,6 +183,21 @@ export function initDatabase() {
   if (!founderColumns.includes('tagline')) db.exec("ALTER TABLE founder_info ADD COLUMN tagline TEXT DEFAULT 'Build. Grow. Automate.'");
   if (!founderColumns.includes('instagram')) db.exec("ALTER TABLE founder_info ADD COLUMN instagram TEXT DEFAULT 'https://www.instagram.com/_pivo.tech/'");
 
+  // Ensure enquiries table has all Client Lead Management columns
+  const enquiryColumns = db.prepare("PRAGMA table_info(enquiries)").all().map(c => c.name);
+  if (!enquiryColumns.includes('lead_id')) db.exec("ALTER TABLE enquiries ADD COLUMN lead_id TEXT");
+  if (!enquiryColumns.includes('city')) db.exec("ALTER TABLE enquiries ADD COLUMN city TEXT");
+  if (!enquiryColumns.includes('country')) db.exec("ALTER TABLE enquiries ADD COLUMN country TEXT");
+  if (!enquiryColumns.includes('preferred_contact')) db.exec("ALTER TABLE enquiries ADD COLUMN preferred_contact TEXT DEFAULT 'whatsapp'");
+  if (!enquiryColumns.includes('updated_at')) db.exec("ALTER TABLE enquiries ADD COLUMN updated_at TEXT");
+
+  // Performance and query indexes
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_reviews_status ON reviews(status);
+    CREATE INDEX IF NOT EXISTS idx_enquiries_status ON enquiries(status);
+    CREATE INDEX IF NOT EXISTS idx_projects_category ON projects(category);
+  `);
+
   // Admin users table exists. No default or hardcoded credentials are seeded.
   // Initial admin setup is performed securely via the /admin/setup interface or setup API.
 
@@ -479,6 +494,120 @@ export function initDatabase() {
     for (const p of demoProjects) {
       insertProject.run(p.name, p.slug, p.category, p.tagline, p.description, p.case_study, p.technologies_json, p.image_url, p.screenshots_json, p.live_url, p.github_url, p.completion_date, p.is_featured, p.is_demo_concept, p.sort_order, now);
     }
+  }
+
+  // Ensure Sri Balaji Stationery project showcase exists
+  const balajiProjectCheck = db.prepare("SELECT id FROM projects WHERE slug = 'sri-balaji-stationery'").get();
+  if (!balajiProjectCheck) {
+    db.prepare(`
+      INSERT INTO projects (
+        name, slug, category, tagline, description, case_study, technologies_json,
+        image_url, screenshots_json, live_url, github_url, completion_date, is_featured, is_demo_concept, sort_order, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      'Sri Balaji Stationery',
+      'sri-balaji-stationery',
+      'E-commerce',
+      'Modern digital retail catalog and store website for office and stationery supplies.',
+      'A streamlined digital presence and product catalogue built for Sri Balaji Stationery in Sowcarpet, Chennai. Features clean product indexing, direct WhatsApp ordering, and local store navigation.',
+      'Engineered to help a traditional wholesale & retail stationery business expand its digital reach, showcase high-demand office products, and capture enquiries directly via WhatsApp.',
+      JSON.stringify(['React', 'TypeScript', 'Tailwind CSS', 'WhatsApp Integration', 'SEO Optimization']),
+      '/assets/projects/aura-commerce.svg',
+      JSON.stringify(['/assets/projects/aura-commerce.svg']),
+      'https://sri-balaji-stationery.com',
+      'https://github.com/harishkumaravel2007-svg/sri-balaji-stationery',
+      '2025-02',
+      1,
+      0,
+      1,
+      new Date().toISOString()
+    );
+  }
+
+  // Ensure Web Applications category project exists
+  const webAppProjectCheck = db.prepare("SELECT id FROM projects WHERE slug = 'pulseops-portal'").get();
+  if (!webAppProjectCheck) {
+    db.prepare(`
+      INSERT INTO projects (
+        name, slug, category, tagline, description, case_study, technologies_json,
+        image_url, screenshots_json, live_url, github_url, completion_date, is_featured, is_demo_concept, sort_order, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      'PulseOps Operations Hub',
+      'pulseops-portal',
+      'Web Applications',
+      'Internal dashboard and analytics platform for real-time team workflow management.',
+      'An enterprise web application architecture built for fast operational metrics, task triage, role-based security, and real-time event monitoring.',
+      'Designed for operations-heavy teams needing custom dashboards, exportable reporting, and low-latency state synchronization without heavy SaaS licensing costs.',
+      JSON.stringify(['React 19', 'TypeScript', 'Tailwind CSS', 'Express', 'SQLite', 'WebSockets']),
+      '/assets/projects/nexus-portal.svg',
+      JSON.stringify(['/assets/projects/nexus-portal.svg']),
+      'https://pivotech.in/portfolio/pulseops-portal',
+      'https://github.com/harish-k/pulseops-portal',
+      '2025-02',
+      1,
+      1,
+      4,
+      new Date().toISOString()
+    );
+  }
+
+  // Ensure Business Automation category project exists
+  const automationProjectCheck = db.prepare("SELECT id FROM projects WHERE slug = 'apex-flow-automator'").get();
+  if (!automationProjectCheck) {
+    db.prepare(`
+      INSERT INTO projects (
+        name, slug, category, tagline, description, case_study, technologies_json,
+        image_url, screenshots_json, live_url, github_url, completion_date, is_featured, is_demo_concept, sort_order, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      'Apex Flow Automator',
+      'apex-flow-automator',
+      'Business Automation',
+      'Multi-channel webhook pipeline automating CRM entry, WhatsApp alerts, and PDF invoices.',
+      'An automated workflow engine that monitors incoming customer leads, validates data integrity, triggers instant WhatsApp notifications, and syncs accounting records in seconds.',
+      'Solves manual data re-entry friction between website forms, WhatsApp leads, and billing spreadsheets, cutting lead response times from hours to under 30 seconds.',
+      JSON.stringify(['Node.js', 'Webhooks', 'WhatsApp Business API', 'Cron', 'Automated PDF Engine']),
+      '/assets/projects/omniassist-ai.svg',
+      JSON.stringify(['/assets/projects/omniassist-ai.svg']),
+      'https://pivotech.in/portfolio/apex-flow-automator',
+      'https://github.com/harish-k/apex-flow-automator',
+      '2025-02',
+      1,
+      1,
+      5,
+      new Date().toISOString()
+    );
+  }
+
+  // Ensure Sri Balaji Stationery client review exists in reviews
+  const balajiReviewCheck = db.prepare("SELECT id FROM reviews WHERE business_name LIKE '%Sri Balaji%' OR reviewer_name LIKE '%Balji%' OR reviewer_name LIKE '%Balaji%'").get();
+  if (!balajiReviewCheck) {
+    const now = new Date().toISOString();
+    db.prepare(`
+      INSERT INTO reviews (
+        reviewer_name, business_name, location, project_name, project_description,
+        rating, review_text, website_url, status, is_visible, is_verified,
+        founder_response, founder_responded_at, created_by, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      'Balaji K',
+      'Sri Balaji Stationery',
+      'Chennai, Sowcarpet',
+      'E-commerce & Retail Store Website',
+      'Digital product showcase and online customer ordering workflow.',
+      5,
+      'PIVO TECH built our website for Sri Balaji Stationery in Sowcarpet, Chennai. Their communication was clear throughout the project, and they delivered a clean, functional site on time. Highly recommend Harish K and the PIVO TECH team!',
+      'https://sri-balaji-stationery.com',
+      'approved',
+      1,
+      1,
+      'Thank you for your trust! It was a pleasure building the digital presence for Sri Balaji Stationery.',
+      now,
+      'client',
+      now,
+      now
+    );
   }
 
   // Seed default settings

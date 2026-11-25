@@ -139,16 +139,21 @@ export interface ReviewStats {
 
 export interface Enquiry {
   id: number;
+  lead_id?: string;
   full_name: string;
   email: string;
   phone: string;
   business_name?: string;
+  city?: string;
+  country?: string;
   service_required: string;
   project_budget?: string;
+  preferred_contact?: 'whatsapp' | 'phone' | 'email';
   message: string;
-  status: 'new' | 'in_discussion' | 'closed';
+  status: 'new' | 'contacted' | 'discussion' | 'in_discussion' | 'proposal_sent' | 'converted' | 'not_interested' | 'closed';
   notes?: string;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface AdminUser {

@@ -89,6 +89,23 @@ export const Reviews: React.FC = () => {
       return;
     }
 
+    let sanitizedUrl = websiteUrl.trim();
+    if (sanitizedUrl) {
+      if (!/^https?:\/\//i.test(sanitizedUrl)) {
+        sanitizedUrl = 'https://' + sanitizedUrl;
+      }
+      try {
+        const parsed = new URL(sanitizedUrl);
+        if (!parsed.hostname || !parsed.hostname.includes('.')) {
+          setErrorMessage('Please provide a valid website URL (e.g. https://yourbusiness.com) or leave the field blank.');
+          return;
+        }
+      } catch (err) {
+        setErrorMessage('Please provide a valid website URL (e.g. https://yourbusiness.com) or leave the field blank.');
+        return;
+      }
+    }
+
     setSubmitting(true);
     try {
       const res = await api.submitReview({
@@ -97,7 +114,7 @@ export const Reviews: React.FC = () => {
         location: location.trim() || undefined,
         project_name: projectName.trim() || undefined,
         project_description: projectDescription.trim() || undefined,
-        website_url: websiteUrl.trim() || undefined,
+        website_url: sanitizedUrl || undefined,
         rating,
         review_text: reviewText.trim(),
         honeypot,

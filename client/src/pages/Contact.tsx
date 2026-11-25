@@ -25,6 +25,9 @@ export const Contact: React.FC = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [businessName, setBusinessName] = useState('');
+  const [city, setCity] = useState('');
+  const [country, setCountry] = useState('India');
+  const [preferredContact, setPreferredContact] = useState<'whatsapp' | 'phone' | 'email'>('whatsapp');
   const [serviceRequired, setServiceRequired] = useState(preselectedService || 'Website Development');
   const [projectBudget, setProjectBudget] = useState('₹25,000 - ₹50,000 ($300 - $600)');
   const [message, setMessage] = useState('');
@@ -72,6 +75,9 @@ export const Contact: React.FC = () => {
         email,
         phone,
         business_name: businessName,
+        city,
+        country,
+        preferred_contact: preferredContact,
         service_required: serviceRequired,
         project_budget: projectBudget,
         message,
@@ -80,11 +86,16 @@ export const Contact: React.FC = () => {
         captcha_expected: num1 + num2
       });
 
-      setSuccessMessage(res.message);
+      setSuccessMessage(
+        res.lead_id
+          ? `${res.message} Your official Lead Reference ID is ${res.lead_id}. Founder Harish K will review your submission shortly.`
+          : res.message
+      );
       setFullName('');
       setEmail('');
       setPhone('');
       setBusinessName('');
+      setCity('');
       setMessage('');
       generateCaptcha();
     } catch (err: any) {
@@ -344,6 +355,52 @@ export const Contact: React.FC = () => {
                       placeholder="e.g. Zenith Tech"
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B] focus:ring-1 focus:ring-[#C6A15B]"
                     />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                  {/* City */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      City / Region
+                    </label>
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="e.g. Chennai, Mumbai, Dubai"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B] focus:ring-1 focus:ring-[#C6A15B]"
+                    />
+                  </div>
+
+                  {/* Country */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Country
+                    </label>
+                    <input
+                      type="text"
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      placeholder="e.g. India, USA, UAE"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B] focus:ring-1 focus:ring-[#C6A15B]"
+                    />
+                  </div>
+
+                  {/* Preferred Contact Method */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Preferred Contact Channel
+                    </label>
+                    <select
+                      value={preferredContact}
+                      onChange={(e) => setPreferredContact(e.target.value as any)}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:border-[#C6A15B] focus:ring-1 focus:ring-[#C6A15B]"
+                    >
+                      <option value="whatsapp">WhatsApp Message</option>
+                      <option value="phone">Direct Phone Call</option>
+                      <option value="email">Email</option>
+                    </select>
                   </div>
                 </div>
 

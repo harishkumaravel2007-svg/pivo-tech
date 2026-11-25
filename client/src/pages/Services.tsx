@@ -61,10 +61,14 @@ export const Services: React.FC = () => {
     business_name: '',
     phone: '',
     email: '',
+    city: '',
+    country: 'India',
+    preferred_contact: 'whatsapp' as 'whatsapp' | 'phone' | 'email',
     service_required: '',
     project_budget: '₹50,000 – ₹1,00,000',
     message: ''
   });
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [captchaAnswer, setCaptchaAnswer] = useState('');
   const [captchaNum1, setCaptchaNum1] = useState(4);
   const [captchaNum2, setCaptchaNum2] = useState(3);
@@ -149,6 +153,9 @@ export const Services: React.FC = () => {
       business_name: '',
       phone: '',
       email: '',
+      city: '',
+      country: 'India',
+      preferred_contact: 'whatsapp',
       service_required: service.title,
       project_budget: '₹50,000 – ₹1,00,000',
       message: `Hello PIVO TECH, I would like to get "${service.title}" for my business.`
@@ -533,6 +540,127 @@ export const Services: React.FC = () => {
         })}
       </main>
 
+      {/* Engineered Workflow Pipeline Architecture */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-200">
+        <div className="text-center max-w-3xl mx-auto mb-12">
+          <span className="text-xs uppercase font-bold tracking-widest text-[#C6A15B]">
+            Engineered Delivery Methodology
+          </span>
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-[#101B33] mt-2">
+            The PIVO TECH Automation &amp; Development Workflow
+          </h2>
+          <p className="text-slate-600 text-sm sm:text-base mt-3 leading-relaxed">
+            Every business solution, web system, and AI agent we build follows an end-to-end, resilient 7-stage architectural pipeline designed for zero data loss, low latency, and deterministic outcomes.
+          </p>
+        </div>
+
+        {/* 7-Stage Pipeline Diagram */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-10">
+          {[
+            { step: '01', title: 'Trigger Event', desc: 'Customer form, webhook, API call, or scheduled cron timer.' },
+            { step: '02', title: 'Data Ingest', desc: 'Raw payload parsed, sanitized, and normalized into strict types.' },
+            { step: '03', title: 'Validation', desc: 'Anti-bot honeypots, rate limiting, and mathematical verification.' },
+            { step: '04', title: 'Processing', desc: 'LLM agents, core business logic, and transactional execution.' },
+            { step: '05', title: 'Notification', desc: 'Instant WhatsApp message, email alerts, and team webhook sync.' },
+            { step: '06', title: 'Database Sync', desc: 'ACID-compliant storage, lead status tracking, and audit logging.' },
+            { step: '07', title: 'Reports & BI', desc: 'Admin dashboards, CSV lead export, and executive analytics.' }
+          ].map((node, idx) => (
+            <div
+              key={idx}
+              className="bg-white rounded-2xl p-4 border border-slate-200 shadow-subtle hover:border-[#C6A15B] transition-all flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-black text-[#C6A15B] bg-[#101B33] px-2 py-0.5 rounded-md">
+                    {node.step}
+                  </span>
+                  <span className="text-[10px] uppercase font-bold text-slate-400">Phase</span>
+                </div>
+                <h4 className="text-sm font-bold text-[#101B33] mb-1">{node.title}</h4>
+                <p className="text-[11px] text-slate-500 leading-normal">{node.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Workflow CTA */}
+        <div className="p-6 rounded-2xl bg-gradient-to-r from-[#101B33] to-[#1C2C4E] text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <h4 className="text-base sm:text-lg font-bold">Need a custom automated pipeline for your company?</h4>
+            <p className="text-xs sm:text-sm text-slate-300">We audit your current bottlenecks and build end-to-end automations that save hours daily.</p>
+          </div>
+          <a
+            href="https://wa.me/919944245043?text=Hi%20Harish%2C%20I%20want%20to%20discuss%20an%20automated%20workflow%20pipeline%20for%20my%20business."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-5 py-2.5 rounded-xl bg-[#C6A15B] text-[#101B33] hover:bg-[#D4AF37] font-bold text-xs shrink-0 transition-all shadow-md"
+          >
+            Consult on WhatsApp &rarr;
+          </a>
+        </div>
+      </section>
+
+      {/* Frequently Asked Questions (FAQ) Accordion */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-200">
+        <div className="text-center mb-10">
+          <span className="text-xs uppercase font-bold tracking-widest text-[#C6A15B]">
+            Clear Answers
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#101B33] mt-2">
+            Frequently Asked Questions
+          </h2>
+          <p className="text-slate-600 text-sm mt-2">
+            Everything you need to know about partnering with PIVO TECH.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          {[
+            {
+              q: 'How do we get started with a project?',
+              a: 'You can submit your project requirements using any of our service enquiry forms or reach out directly via WhatsApp (+91 99442 45043). Founder Harish K conducts an initial technical scoping review within 4 business hours and provides a clear timeline and milestone proposal.'
+            },
+            {
+              q: 'Do you work with international clients outside India?',
+              a: 'Yes. PIVO TECH operates globally. We partner with clients across India (Chennai, Bangalore, Mumbai, etc.) as well as international businesses across North America, Europe, UAE, and Southeast Asia. We communicate effectively through WhatsApp, Google Meet, and email.'
+            },
+            {
+              q: 'What are the typical project delivery timelines?',
+              a: 'High-converting business websites and landing page systems are delivered within 1 to 3 weeks. Comprehensive e-commerce portals, custom web applications, and multi-channel AI workflow automations typically require 2 to 4 weeks, with live staging previews provided at key milestones.'
+            },
+            {
+              q: 'Can PIVO TECH integrate with our existing software and tools?',
+              a: 'Yes. We specialize in custom integrations connecting your web platforms to WhatsApp Business API, CRM systems (HubSpot, Zoho, Salesforce), Google Workspace, payment gateways (Razorpay, Stripe), SQLite/Postgres databases, and ERP spreadsheets.'
+            },
+            {
+              q: 'What kind of support and warranty is provided after launch?',
+              a: 'Every completed solution includes a comprehensive post-deployment warranty covering bug fixes, performance tuning, and security updates, with direct architectural oversight from Founder & CEO Harish K.'
+            }
+          ].map((faq, idx) => (
+            <div
+              key={idx}
+              className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-subtle transition-all"
+            >
+              <button
+                type="button"
+                onClick={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)}
+                className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-[#101B33] hover:text-[#C6A15B] transition-colors"
+              >
+                <span>{faq.q}</span>
+                <span className="p-1 rounded-lg bg-slate-100 text-slate-600 shrink-0">
+                  {openFaqIndex === idx ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </span>
+              </button>
+              {openFaqIndex === idx && (
+                <div className="px-5 pb-5 pt-1 text-slate-600 text-xs sm:text-sm leading-relaxed border-t border-slate-100">
+                  {faq.a}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Fullscreen Lightbox Modal */}
       {lightboxImage && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
@@ -869,6 +997,49 @@ export const Services: React.FC = () => {
                       placeholder="client@yourbusiness.com"
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
                     />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                      City / Location
+                    </label>
+                    <input
+                      type="text"
+                      value={enquiryForm.city}
+                      onChange={(e) => setEnquiryForm({ ...enquiryForm, city: e.target.value })}
+                      placeholder="e.g. Chennai, Mumbai"
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                      Country
+                    </label>
+                    <input
+                      type="text"
+                      value={enquiryForm.country}
+                      onChange={(e) => setEnquiryForm({ ...enquiryForm, country: e.target.value })}
+                      placeholder="e.g. India, USA, UAE"
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                      Preferred Contact
+                    </label>
+                    <select
+                      value={enquiryForm.preferred_contact}
+                      onChange={(e) => setEnquiryForm({ ...enquiryForm, preferred_contact: e.target.value as any })}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-[#C6A15B]"
+                    >
+                      <option value="whatsapp">WhatsApp Message</option>
+                      <option value="phone">Phone Call</option>
+                      <option value="email">Email</option>
+                    </select>
                   </div>
                 </div>
 

@@ -96,32 +96,32 @@ router.post('/submit', rateLimiter(60000, 10), (req, res) => {
 
   // Anti-bot honeypot check
   if (honeypot) {
-    return res.status(400).json({ error: 'Automated submission rejected.' });
+    return res.status(400).json({ success: false, error: 'Automated submission rejected.' });
   }
 
   // Verification math challenge check
   if (captcha_expected !== undefined && Number(captcha_answer) !== Number(captcha_expected)) {
-    return res.status(400).json({ error: 'Security challenge answer is incorrect. Please try again.' });
+    return res.status(400).json({ success: false, error: 'Security challenge answer is incorrect. Please try again.' });
   }
 
   if (!reviewer_name || !reviewer_name.trim()) {
-    return res.status(400).json({ error: 'Your name is required.' });
+    return res.status(400).json({ success: false, error: 'Your name is required.' });
   }
 
   const numericRating = Number(rating);
   if (!numericRating || numericRating < 1 || numericRating > 5) {
-    return res.status(400).json({ error: 'Please provide a valid rating between 1 and 5 stars.' });
+    return res.status(400).json({ success: false, error: 'Please provide a valid rating between 1 and 5 stars.' });
   }
 
   if (!review_text || review_text.trim().length < 10) {
-    return res.status(400).json({ error: 'Please provide a genuine review description (minimum 10 characters).' });
+    return res.status(400).json({ success: false, error: 'Please provide a genuine review description (minimum 10 characters).' });
   }
 
   let cleanWebsiteUrl = null;
   if (website_url && website_url.trim()) {
     cleanWebsiteUrl = normalizeAndValidateUrl(website_url);
     if (!cleanWebsiteUrl) {
-      return res.status(400).json({ error: 'Please provide a valid website URL (e.g. https://yourbusiness.com).' });
+      return res.status(400).json({ success: false, error: 'Please provide a valid website URL (e.g. https://yourbusiness.com).' });
     }
   }
 
@@ -143,6 +143,7 @@ router.post('/submit', rateLimiter(60000, 10), (req, res) => {
 
   if (existingDuplicate) {
     return res.status(429).json({
+      success: false,
       error: 'A review with this text or from your connection has already been submitted recently. Please allow time for moderation.'
     });
   }
@@ -180,6 +181,7 @@ router.post('/submit', rateLimiter(60000, 10), (req, res) => {
   );
 
   res.status(201).json({
+    success: true,
     message: 'Thank you for your review! It has been received and entered pending moderation. Once verified by the PIVO TECH team, it will appear publicly.'
   });
 });
