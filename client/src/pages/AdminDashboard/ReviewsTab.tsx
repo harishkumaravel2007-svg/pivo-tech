@@ -19,14 +19,19 @@ import {
   Briefcase,
   MessageSquare,
   CornerDownRight,
-  UserCheck
+  UserCheck,
+  Search,
+  Filter,
+  FolderGit2,
+  Link as LinkIcon
 } from 'lucide-react';
 import { api, getAssetUrl } from '../../services/api';
-import { Review } from '../../types';
+import { Review, Project } from '../../types';
 import { RatingStars } from '../../components/RatingStars';
 
 export const ReviewsTab: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [summary, setSummary] = useState({
     total: 0,
     pending: 0,
@@ -34,7 +39,12 @@ export const ReviewsTab: React.FC = () => {
     rejected: 0,
     average: 0
   });
+
+  // Filters & Search
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+  const [projectFilter, setProjectFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Modals state
@@ -51,6 +61,7 @@ export const ReviewsTab: React.FC = () => {
     business_name: '',
     business_logo_url: '',
     location: '',
+    project_id: null as number | null,
     project_name: '',
     project_description: '',
     rating: 5,
@@ -68,15 +79,31 @@ export const ReviewsTab: React.FC = () => {
 
   useEffect(() => {
     loadReviews();
+    loadProjects();
   }, []);
+
+  const loadProjects = async () => {
+    try {
+      const res = await api.getAllProjectsAdmin();
+      setProjects(res.projects || []);
+    } catch (err) {
+      console.warn('Could not load portfolio projects for reviews linking:', err);
+    }
+  };
 
   const loadReviews = async () => {
     try {
       const res = await api.getAdminReviews();
-      setReviews(res.reviews);
-      setSummary(res.summary);
+      setReviews(res.reviews || []);
+      setSummary(res.summary || {
+        total: res.reviews?.length || 0,
+        pending: res.reviews?.filter(r => r.status === 'pending').length || 0,
+        approved: res.reviews?.filter(r => r.status === 'approved').length || 0,
+        rejected: res.reviews?.filter(r => r.status === 'rejected').length || 0,
+        average: 5.0
+      });
     } catch (err: any) {
-      setStatusMsg({ type: 'error', text: err.message });
+      setStatusMsg({ type: 'error', text: err.message || 'Failed to load reviews' });
     }
   };
 
@@ -98,6 +125,22 @@ export const ReviewsTab: React.FC = () => {
     }
   };
 
+  const handleLinkProject = async (reviewId: number, projectId: number | null) => {
+    try {
+      await api.linkReviewToProject(reviewId, projectId);
+      const projName = projectId ? projects.find(p => p.id === projectId)?.name : null;
+      setStatusMsg({
+        type: 'success',
+        text: projectId
+          ? `Review linked to project "${projName}".`
+          : 'Review unlinked from project.'
+      });
+      loadReviews();
+    } catch (err: any) {
+      setStatusMsg({ type: 'error', text: err.message || 'Failed to link review to project' });
+    }
+  };
+
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to permanently delete this client review record?')) return;
     try {
@@ -115,6 +158,7 @@ export const ReviewsTab: React.FC = () => {
       business_name: '',
       business_logo_url: '',
       location: '',
+      project_id: null,
       project_name: '',
       project_description: '',
       rating: 5,
@@ -135,6 +179,7 @@ export const ReviewsTab: React.FC = () => {
       business_name: rev.business_name || '',
       business_logo_url: rev.business_logo_url || '',
       location: rev.location || '',
+      project_id: rev.project_id || null,
       project_name: rev.project_name || '',
       project_description: rev.project_description || '',
       rating: rev.rating,
@@ -159,24 +204,20 @@ export const ReviewsTab: React.FC = () => {
     if (!file) return;
 
     setUploadingLogo(true);
+    setStatusMsg(null);
     try {
       const res = await api.uploadFile(file);
       setFormData(prev => ({ ...prev, business_logo_url: res.url }));
       setStatusMsg({ type: 'success', text: 'Client logo uploaded successfully.' });
     } catch (err: any) {
-      setStatusMsg({ type: 'error', text: err.message || 'Failed to upload logo' });
+      setStatusMsg({ type: 'error', text: err.message || 'Logo upload failed.' });
     } finally {
       setUploadingLogo(false);
     }
   };
 
-  const handleSaveNewClient = async (e: React.FormEvent) => {
+  const handleSaveNewReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.reviewer_name.trim() || !formData.review_text.trim()) {
-      setStatusMsg({ type: 'error', text: 'Client name and written review are required.' });
-      return;
-    }
-
     try {
       await api.adminAddClientReview({
         ...formData,
@@ -184,14 +225,14 @@ export const ReviewsTab: React.FC = () => {
         is_verified: formData.is_verified ? 1 : 0
       });
       setIsAddModalOpen(false);
-      setStatusMsg({ type: 'success', text: 'Genuine client review record created and published.' });
+      setStatusMsg({ type: 'success', text: 'New client review added successfully.' });
       loadReviews();
     } catch (err: any) {
-      setStatusMsg({ type: 'error', text: err.message || 'Failed to create client review' });
+      setStatusMsg({ type: 'error', text: err.message || 'Failed to add client review' });
     }
   };
 
-  const handleSaveEditClient = async (e: React.FormEvent) => {
+  const handleSaveEditReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedReview) return;
 
@@ -230,9 +271,27 @@ export const ReviewsTab: React.FC = () => {
     }
   };
 
-  const filteredReviews = filter === 'all'
-    ? reviews
-    : reviews.filter(r => r.status === filter);
+  const filteredReviews = reviews.filter((r) => {
+    if (filter !== 'all' && r.status !== filter) return false;
+    if (projectFilter !== 'all') {
+      if (projectFilter === 'unlinked' && r.project_id) return false;
+      if (projectFilter !== 'unlinked' && String(r.project_id) !== projectFilter) return false;
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchText = [
+        r.review_id,
+        r.reviewer_name,
+        r.business_name,
+        r.location,
+        r.project_name,
+        r.linked_project_name,
+        r.review_text
+      ].filter(Boolean).join(' ').toLowerCase();
+      if (!matchText.includes(q)) return false;
+    }
+    return true;
+  });
 
   return (
     <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-subtle space-y-6">
@@ -243,10 +302,10 @@ export const ReviewsTab: React.FC = () => {
             Client Showcase &amp; Review Management
           </span>
           <h2 className="text-2xl font-extrabold text-[#101B33] mt-1">
-            Client Management &amp; Moderation
+            Client Review Management &amp; Moderation
           </h2>
           <p className="text-slate-500 text-xs mt-1">
-            Manage genuine client reviews received with permission, upload client logos, edit external website URLs, and publish official founder responses.
+            Approve incoming submissions, link testimonials to portfolio projects, issue unique IDs, and publish official founder responses.
           </p>
         </div>
 
@@ -303,240 +362,300 @@ export const ReviewsTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-2 border-b border-slate-100 pb-4 overflow-x-auto">
-        {(['all', 'pending', 'approved', 'rejected'] as const).map((st) => (
-          <button
-            key={st}
-            onClick={() => setFilter(st)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-colors ${
-              filter === st
-                ? 'bg-[#101B33] text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
+      {/* Search & Filter Bar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200">
+        <div className="relative flex-1">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by review ID, reviewer, business, or keyword..."
+            className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-slate-200 text-xs bg-white focus:outline-none focus:border-[#C6A15B]"
+          />
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <select
+            value={projectFilter}
+            onChange={(e) => setProjectFilter(e.target.value)}
+            className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white text-slate-700 font-medium focus:outline-none"
           >
-            {st} ({st === 'all' ? reviews.length : reviews.filter(r => r.status === st).length})
-          </button>
-        ))}
+            <option value="all">All Linked Projects</option>
+            <option value="unlinked">Unlinked Reviews</option>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+
+          <div className="flex gap-1 bg-white p-1 rounded-xl border border-slate-200">
+            {(['all', 'pending', 'approved', 'rejected'] as const).map((st) => (
+              <button
+                key={st}
+                onClick={() => setFilter(st)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold capitalize transition-colors ${
+                  filter === st
+                    ? 'bg-[#101B33] text-white'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                {st}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Reviews and Clients List */}
       <div className="space-y-4">
         {filteredReviews.length > 0 ? (
-          filteredReviews.map((rev) => (
-            <div
-              key={rev.id}
-              className={`p-6 rounded-2xl border transition-all flex flex-col gap-4 ${
-                rev.status === 'pending'
-                  ? 'bg-amber-50/40 border-amber-200'
-                  : rev.status === 'approved'
-                  ? 'bg-white border-slate-200 shadow-sm'
-                  : 'bg-slate-50 border-slate-200 opacity-60'
-              }`}
-            >
-              {/* Header row: Identity & Meta */}
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                <div className="flex items-start gap-4">
-                  {/* Logo or Initial */}
-                  {rev.business_logo_url ? (
-                    <img
-                      src={getAssetUrl(rev.business_logo_url)}
-                      alt={rev.business_name || rev.reviewer_name}
-                      className="w-12 h-12 rounded-xl object-contain bg-slate-50 border border-slate-200 p-1 shrink-0"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-xl bg-[#101B33] text-white flex items-center justify-center font-bold text-sm shrink-0">
-                      {(rev.business_name || rev.reviewer_name).substring(0, 2).toUpperCase()}
-                    </div>
-                  )}
+          filteredReviews.map((rev) => {
+            const displayId = rev.review_id || `PIVO-REV-${rev.id}`;
 
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="text-base font-bold text-[#101B33]">
-                        {rev.business_name || rev.reviewer_name}
-                      </h4>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                        rev.status === 'pending'
-                          ? 'bg-amber-100 text-amber-800'
-                          : rev.status === 'approved'
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : 'bg-rose-100 text-rose-800'
-                      }`}>
-                        {rev.status}
-                      </span>
-                      {rev.is_verified === 1 && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200">
-                          Verified Client
-                        </span>
-                      )}
-                      {rev.is_visible === 0 && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200">
-                          Hidden from Showcase
-                        </span>
-                      )}
-                      {rev.created_by === 'founder' && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-blue-800 bg-blue-50 border border-blue-200">
-                          Founder Added
-                        </span>
-                      )}
-                    </div>
+            return (
+              <div
+                key={rev.id}
+                className={`p-6 rounded-2xl border transition-all flex flex-col gap-4 ${
+                  rev.status === 'pending'
+                    ? 'bg-amber-50/40 border-amber-200'
+                    : rev.status === 'approved'
+                    ? 'bg-white border-slate-200 shadow-sm'
+                    : 'bg-slate-50 border-slate-200 opacity-60'
+                }`}
+              >
+                {/* Header row: Identity, Review ID, Badges & Rating */}
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    {/* Logo or Initial */}
+                    {rev.business_logo_url ? (
+                      <img
+                        src={getAssetUrl(rev.business_logo_url)}
+                        alt={rev.business_name || rev.reviewer_name}
+                        className="w-12 h-12 rounded-xl object-contain bg-slate-50 border border-slate-200 p-1 shrink-0"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-xl bg-[#101B33] text-white flex items-center justify-center font-bold text-sm shrink-0">
+                        {(rev.business_name || rev.reviewer_name).substring(0, 2).toUpperCase()}
+                      </div>
+                    )}
 
-                    <p className="text-xs text-slate-600 mt-0.5 font-medium">
-                      Client Contact: {rev.reviewer_name} {rev.location && `• ${rev.location}`}
-                    </p>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {/* Review ID Badge (MODULE 3) */}
+                        <span className="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-[#101B33] text-[#E5C378] tracking-wider border border-[#1A2846]">
+                          {displayId}
+                        </span>
 
-                    {rev.project_name && (
-                      <p className="text-xs text-[#101B33] font-semibold mt-1">
-                        Project: {rev.project_name}
+                        <h4 className="text-base font-bold text-[#101B33]">
+                          {rev.business_name || rev.reviewer_name}
+                        </h4>
+
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                          rev.status === 'pending'
+                            ? 'bg-amber-100 text-amber-800'
+                            : rev.status === 'approved'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-rose-100 text-rose-800'
+                        }`}>
+                          {rev.status}
+                        </span>
+
+                        {rev.is_verified === 1 && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200">
+                            Verified Client
+                          </span>
+                        )}
+
+                        {/* Linked Project Badge (MODULE 4) */}
+                        {rev.linked_project_name && (
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F4EBD8] text-[#8C6D2D] border border-[#E5C378] flex items-center gap-1">
+                            <FolderGit2 className="w-3 h-3 text-[#C6A15B]" />
+                            <span>Linked: {rev.linked_project_name}</span>
+                          </span>
+                        )}
+
+                        {rev.is_visible === 0 && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200">
+                            Hidden from Showcase
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-xs text-slate-600 mt-1 font-medium">
+                        Client Contact: {rev.reviewer_name} {rev.location && `• ${rev.location}`}
                       </p>
-                    )}
-                  </div>
-                </div>
 
-                <div className="flex flex-col sm:items-end">
-                  <RatingStars rating={rev.rating} size="sm" />
-                  <span className="text-[10px] text-slate-400 mt-1">
-                    Submitted: {new Date(rev.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-
-              {/* Review Text */}
-              <div className="bg-slate-50/80 p-3.5 rounded-xl border border-slate-100 text-xs text-slate-700 italic">
-                "{rev.review_text}"
-              </div>
-
-              {/* External Client Website */}
-              {rev.website_url && (
-                <div className="flex items-center gap-2 text-xs">
-                  <Globe className="w-3.5 h-3.5 text-[#C6A15B]" />
-                  <span className="text-slate-500 font-medium">Website:</span>
-                  <a
-                    href={rev.website_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#101B33] hover:underline font-semibold inline-flex items-center gap-1"
-                  >
-                    <span>{rev.website_url}</span>
-                    <ExternalLink className="w-3 h-3 text-slate-400" />
-                  </a>
-                </div>
-              )}
-
-              {/* Distinct Official Founder Response */}
-              {rev.founder_response && (
-                <div className="p-3.5 rounded-xl bg-gradient-to-r from-blue-50/60 to-slate-50 border border-blue-100">
-                  <div className="flex items-center justify-between text-[11px] font-bold text-[#101B33] mb-1">
-                    <div className="flex items-center gap-1.5">
-                      <CornerDownRight className="w-3.5 h-3.5 text-[#C6A15B]" />
-                      <span>Official Response from Harish K, Founder &amp; CEO:</span>
+                      {rev.project_name && (
+                        <p className="text-xs text-[#101B33] font-semibold mt-0.5">
+                          Project: {rev.project_name}
+                        </p>
+                      )}
                     </div>
-                    {rev.founder_responded_at && (
-                      <span className="text-[10px] text-slate-400 font-normal">
-                        {new Date(rev.founder_responded_at).toLocaleDateString()}
-                      </span>
-                    )}
                   </div>
-                  <p className="text-xs text-slate-700 pl-5">
-                    {rev.founder_response}
-                  </p>
+
+                  <div className="flex flex-col sm:items-end shrink-0">
+                    <RatingStars rating={rev.rating} size="sm" />
+                    <span className="text-[10px] text-slate-400 mt-1">
+                      Submitted: {new Date(rev.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
                 </div>
-              )}
 
-              {/* Management Control Actions */}
-              <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
-                {/* Moderation status buttons */}
-                <div className="flex flex-wrap items-center gap-2">
-                  {rev.status !== 'approved' ? (
-                    <>
-                      <button
-                        onClick={() => handleStatusChange(rev.id, 'approved', false, true)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
-                        title="Approve without verified badge"
-                      >
-                        <CheckCircle className="w-3.5 h-3.5" />
-                        <span>Approve</span>
-                      </button>
-                      <button
-                        onClick={() => handleStatusChange(rev.id, 'approved', true, true)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#101B33] text-[#E5C378] hover:bg-[#1C2C4E] border border-[#C6A15B]/30 transition-colors"
-                        title="Approve and mark as verified client"
-                      >
-                        <UserCheck className="w-3.5 h-3.5 text-[#C6A15B]" />
-                        <span>Approve (Verified)</span>
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      onClick={() => handleStatusChange(rev.id, 'approved', !rev.is_verified, rev.is_visible !== 0)}
-                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors"
+                {/* Review Text */}
+                <div className="bg-slate-50/80 p-3.5 rounded-xl border border-slate-100 text-xs text-slate-700 italic">
+                  "{rev.review_text}"
+                </div>
+
+                {/* External Client Website */}
+                {rev.website_url && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <Globe className="w-3.5 h-3.5 text-[#C6A15B]" />
+                    <span className="text-slate-500 font-medium">Website:</span>
+                    <a
+                      href={rev.website_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#101B33] hover:underline font-semibold inline-flex items-center gap-1"
                     >
-                      <span>{rev.is_verified ? 'Remove Verified' : 'Mark Verified'}</span>
-                    </button>
-                  )}
+                      <span>{rev.website_url}</span>
+                      <ExternalLink className="w-3 h-3 text-slate-400" />
+                    </a>
+                  </div>
+                )}
 
-                  {rev.status !== 'rejected' && (
-                    <button
-                      onClick={() => handleStatusChange(rev.id, 'rejected', false, false)}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
-                    >
-                      <XCircle className="w-3.5 h-3.5 text-rose-500" />
-                      <span>Reject</span>
-                    </button>
-                  )}
+                {/* Founder Response Display */}
+                {rev.founder_response && (
+                  <div className="p-3.5 rounded-xl bg-gradient-to-r from-blue-50/60 to-slate-50 border border-blue-100">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-[#101B33] mb-1">
+                      <div className="flex items-center gap-1.5">
+                        <CornerDownRight className="w-3.5 h-3.5 text-[#C6A15B]" />
+                        <span>Official Response from Harish K, Founder &amp; CEO:</span>
+                      </div>
+                      {rev.founder_responded_at && (
+                        <span className="text-[10px] text-slate-400 font-normal">
+                          {new Date(rev.founder_responded_at).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-700 pl-5">
+                      {rev.founder_response}
+                    </p>
+                  </div>
+                )}
 
-                  {/* Visibility Toggle */}
-                  <button
-                    onClick={() => handleStatusChange(rev.id, undefined, undefined, rev.is_visible === 0)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors"
-                    title={rev.is_visible === 0 ? 'Make visible in showcase' : 'Hide from showcase'}
+                {/* Link to Portfolio Project Selector (MODULE 4) */}
+                <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-2">
+                    <LinkIcon className="w-3.5 h-3.5 text-[#C6A15B]" />
+                    <span className="font-bold text-slate-700">Associated Portfolio Project:</span>
+                  </div>
+                  <select
+                    value={rev.project_id || ''}
+                    onChange={(e) => handleLinkProject(rev.id, e.target.value ? Number(e.target.value) : null)}
+                    className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-[#101B33] focus:outline-none focus:border-[#C6A15B]"
                   >
-                    {rev.is_visible === 0 ? (
+                    <option value="">-- No Linked Portfolio Project --</option>
+                    {projects.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} ({p.category})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                  {/* Status moderation */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {rev.status !== 'approved' ? (
                       <>
-                        <Eye className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Show Publicly</span>
+                        <button
+                          onClick={() => handleStatusChange(rev.id, 'approved', false, true)}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+                        >
+                          <CheckCircle className="w-3.5 h-3.5" />
+                          <span>Approve</span>
+                        </button>
+                        <button
+                          onClick={() => handleStatusChange(rev.id, 'approved', true, true)}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#101B33] text-[#E5C378] hover:bg-[#1C2C4E] border border-[#C6A15B]/30 transition-colors"
+                        >
+                          <UserCheck className="w-3.5 h-3.5 text-[#C6A15B]" />
+                          <span>Approve (Verified)</span>
+                        </button>
                       </>
                     ) : (
-                      <>
-                        <EyeOff className="w-3.5 h-3.5 text-slate-500" />
-                        <span>Hide</span>
-                      </>
+                      <button
+                        onClick={() => handleStatusChange(rev.id, 'approved', !rev.is_verified, rev.is_visible !== 0)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors"
+                      >
+                        <span>{rev.is_verified ? 'Remove Verified' : 'Mark Verified'}</span>
+                      </button>
                     )}
-                  </button>
-                </div>
 
-                {/* Edit, Response & Delete actions */}
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => openResponseModal(rev)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200 transition-colors"
-                  >
-                    <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
-                    <span>{rev.founder_response ? 'Edit Response' : 'Founder Response'}</span>
-                  </button>
+                    {rev.status !== 'rejected' && (
+                      <button
+                        onClick={() => handleStatusChange(rev.id, 'rejected', false, false)}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+                      >
+                        <XCircle className="w-3.5 h-3.5 text-rose-500" />
+                        <span>Reject</span>
+                      </button>
+                    )}
 
-                  <button
-                    onClick={() => openEditModal(rev)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
-                  >
-                    <Edit2 className="w-3.5 h-3.5" />
-                    <span>Edit</span>
-                  </button>
+                    {/* Visibility Toggle */}
+                    <button
+                      onClick={() => handleStatusChange(rev.id, undefined, undefined, rev.is_visible === 0)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors"
+                      title={rev.is_visible === 0 ? 'Make visible in showcase' : 'Hide from showcase'}
+                    >
+                      {rev.is_visible === 0 ? (
+                        <>
+                          <Eye className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Show Publicly</span>
+                        </>
+                      ) : (
+                        <>
+                          <EyeOff className="w-3.5 h-3.5 text-slate-500" />
+                          <span>Hide</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
 
-                  <button
-                    onClick={() => handleDelete(rev.id)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                    title="Permanently Delete Record"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  {/* Actions */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => openResponseModal(rev)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200 transition-colors"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
+                      <span>{rev.founder_response ? 'Edit Response' : 'Founder Response'}</span>
+                    </button>
+
+                    <button
+                      onClick={() => openEditModal(rev)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span>Edit</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleDelete(rev.id)}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                      title="Permanently Delete Record"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <p className="text-xs text-slate-500 py-8 text-center">
-            No client reviews matching the "{filter}" filter.
+            No client reviews matching the current filters.
           </p>
         )}
       </div>
@@ -548,224 +667,161 @@ export const ReviewsTab: React.FC = () => {
             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div>
                 <span className="text-xs uppercase font-bold tracking-widest text-[#C6A15B]">
-                  Client Management
+                  Direct Entry
                 </span>
-                <h3 className="text-xl font-bold text-[#101B33]">
-                  Add Genuine Client Review (With Permission)
+                <h3 className="text-lg font-bold text-[#101B33]">
+                  Add Client Review (With Permission)
                 </h3>
               </div>
-              <button
-                onClick={() => setIsAddModalOpen(false)}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-lg"
-              >
+              <button onClick={() => setIsAddModalOpen(false)} className="text-slate-400 hover:text-slate-700 font-bold">
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleSaveNewClient} className="space-y-4 mt-6">
+            <form onSubmit={handleSaveNewReview} className="space-y-4 mt-6 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Client Full Name *
-                  </label>
+                  <label className="block font-bold uppercase text-slate-700 mb-1">Client Full Name *</label>
                   <input
                     type="text"
                     required
                     value={formData.reviewer_name}
                     onChange={(e) => setFormData({ ...formData, reviewer_name: e.target.value })}
-                    placeholder="e.g. Arun Prakash"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
+                    placeholder="e.g. Ramesh Krishnan"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Business / Company Name
-                  </label>
+                  <label className="block font-bold uppercase text-slate-700 mb-1">Business / Company Name</label>
                   <input
                     type="text"
                     value={formData.business_name}
                     onChange={(e) => setFormData({ ...formData, business_name: e.target.value })}
-                    placeholder="e.g. Skyline Logistics India"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
+                    placeholder="e.g. Sri Balaji Stationery"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
                   />
                 </div>
               </div>
 
-              {/* Logo Upload & URL */}
+              {/* Associate with Portfolio Project */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  Business Logo
+                <label className="block font-bold uppercase text-slate-700 mb-1">
+                  Associate With Portfolio Project (MODULE 4)
                 </label>
-                <div className="flex items-center gap-3">
-                  {formData.business_logo_url && (
-                    <img
-                      src={getAssetUrl(formData.business_logo_url)}
-                      alt="Logo preview"
-                      className="w-12 h-12 rounded-xl object-contain bg-slate-50 border border-slate-200 p-1"
-                    />
-                  )}
-                  <input
-                    type="text"
-                    value={formData.business_logo_url}
-                    onChange={(e) => setFormData({ ...formData, business_logo_url: e.target.value })}
-                    placeholder="https://... or upload below"
-                    className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
-                  />
-                  <label className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer shrink-0">
-                    <Upload className="w-4 h-4 inline mr-1" />
-                    {uploadingLogo ? 'Uploading...' : 'Upload Logo'}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLogoUpload}
-                      disabled={uploadingLogo}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
+                <select
+                  value={formData.project_id || ''}
+                  onChange={(e) => setFormData({ ...formData, project_id: e.target.value ? Number(e.target.value) : null })}
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm bg-white text-slate-800"
+                >
+                  <option value="">-- No Direct Project Association --</option>
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} ({p.category})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Location
-                  </label>
+                  <label className="block font-bold uppercase text-slate-700 mb-1">Location</label>
                   <input
                     type="text"
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    placeholder="e.g. Chennai, Tamil Nadu"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
+                    placeholder="e.g. Sowcarpet, Chennai"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Client Website URL
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.website_url}
-                    onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
-                    placeholder="https://clientdomain.com"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Project Name
-                  </label>
+                  <label className="block font-bold uppercase text-slate-700 mb-1">Project Name (Optional)</label>
                   <input
                     type="text"
                     value={formData.project_name}
                     onChange={(e) => setFormData({ ...formData, project_name: e.target.value })}
-                    placeholder="e.g. Fleet ERP &amp; Customer Portal"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
+                    placeholder="e.g. Retail Web & Catalog Platform"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
                   />
                 </div>
+              </div>
 
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Rating (1 to 5 Stars) *
-                  </label>
-                  <div className="flex items-center gap-3 py-1">
-                    <RatingStars
-                      rating={formData.rating}
-                      size="md"
-                      interactive={true}
-                      onRatingChange={(r) => setFormData({ ...formData, rating: r })}
-                    />
-                    <span className="text-xs font-bold text-[#101B33]">
-                      {formData.rating} Stars
-                    </span>
-                  </div>
+              {/* Rating */}
+              <div>
+                <label className="block font-bold uppercase text-slate-700 mb-1">Rating (1 to 5 Stars) *</label>
+                <div className="p-3 bg-[#F7F8FA] rounded-xl border border-slate-200 flex items-center justify-between">
+                  <RatingStars
+                    rating={formData.rating}
+                    size="md"
+                    interactive={true}
+                    onRatingChange={(newVal) => setFormData({ ...formData, rating: newVal })}
+                  />
+                  <span className="font-bold text-[#101B33]">{formData.rating} of 5 Stars</span>
                 </div>
               </div>
 
+              {/* Review Text */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  Project Description (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={formData.project_description}
-                  onChange={(e) => setFormData({ ...formData, project_description: e.target.value })}
-                  placeholder="Summary of the scope and deliverables completed for this client"
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  Client Review Text *
-                </label>
+                <label className="block font-bold uppercase text-slate-700 mb-1">Written Review / Feedback *</label>
                 <textarea
                   required
                   rows={4}
                   value={formData.review_text}
                   onChange={(e) => setFormData({ ...formData, review_text: e.target.value })}
-                  placeholder="Enter the authentic testimonial provided by the client..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
+                  placeholder="Enter genuine client review quote..."
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
                 />
               </div>
 
-              {/* Toggles: Verified & Visibility */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+              {/* Website URL */}
+              <div>
+                <label className="block font-bold uppercase text-slate-700 mb-1">Client Website URL (Optional)</label>
+                <input
+                  type="url"
+                  value={formData.website_url}
+                  onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
+                  placeholder="https://sri-balaji-stationery.com"
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm"
+                />
+              </div>
+
+              {/* Status and Flags */}
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 grid grid-cols-2 gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={formData.is_verified === 1}
                     onChange={(e) => setFormData({ ...formData, is_verified: e.target.checked ? 1 : 0 })}
-                    className="w-4 h-4 rounded text-[#101B33] focus:ring-[#C6A15B]"
+                    className="w-4 h-4 text-emerald-600 rounded"
                   />
-                  <span>Mark as Verified Client Engagement</span>
+                  <span className="font-semibold text-slate-700">Mark as Verified Client</span>
                 </label>
 
-                <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={formData.is_visible === 1}
                     onChange={(e) => setFormData({ ...formData, is_visible: e.target.checked ? 1 : 0 })}
-                    className="w-4 h-4 rounded text-[#101B33] focus:ring-[#C6A15B]"
+                    className="w-4 h-4 text-emerald-600 rounded"
                   />
-                  <span>Visible in Public Showcase</span>
+                  <span className="font-semibold text-slate-700">Visible in Public Showcase</span>
                 </label>
               </div>
 
-              {/* Optional Founder Response */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  Official Founder Response (Optional)
-                </label>
-                <textarea
-                  rows={2}
-                  value={formData.founder_response}
-                  onChange={(e) => setFormData({ ...formData, founder_response: e.target.value })}
-                  placeholder="Optional response from Harish K acknowledging the collaboration..."
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
-                />
-                <span className="text-[10px] text-slate-400">
-                  This will be displayed in a distinct official response box under the review.
-                </span>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+              <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50"
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#101B33] text-white hover:bg-[#1C2C4E] text-xs font-bold shadow-sm"
+                  className="px-5 py-2 rounded-xl bg-[#101B33] text-white hover:bg-[#1C2C4E] font-semibold"
                 >
-                  Save &amp; Publish Client Review
+                  Save &amp; Publish Review
                 </button>
               </div>
             </form>
@@ -773,224 +829,159 @@ export const ReviewsTab: React.FC = () => {
         </div>
       )}
 
-      {/* Modal: Edit Existing Client Review Record */}
+      {/* Modal: Edit Client Review */}
       {isEditModalOpen && selectedReview && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 my-8 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div>
                 <span className="text-xs uppercase font-bold tracking-widest text-[#C6A15B]">
-                  Client Management
+                  Record #{selectedReview.id} &bull; {selectedReview.review_id || `PIVO-REV-${selectedReview.id}`}
                 </span>
-                <h3 className="text-xl font-bold text-[#101B33]">
-                  Edit Client Review &amp; Showcase Record #{selectedReview.id}
+                <h3 className="text-lg font-bold text-[#101B33]">
+                  Edit Client Review
                 </h3>
               </div>
-              <button
-                onClick={() => { setIsEditModalOpen(false); setSelectedReview(null); }}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-lg"
-              >
+              <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-700 font-bold">
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleSaveEditClient} className="space-y-4 mt-6">
+            <form onSubmit={handleSaveEditReview} className="space-y-4 mt-6 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Client Full Name *
-                  </label>
+                  <label className="block font-bold uppercase text-slate-700 mb-1">Client Full Name *</label>
                   <input
                     type="text"
                     required
                     value={formData.reviewer_name}
                     onChange={(e) => setFormData({ ...formData, reviewer_name: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Business / Company Name
-                  </label>
+                  <label className="block font-bold uppercase text-slate-700 mb-1">Business Name</label>
                   <input
                     type="text"
                     value={formData.business_name}
                     onChange={(e) => setFormData({ ...formData, business_name: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm"
                   />
                 </div>
               </div>
 
-              {/* Logo Upload & URL */}
+              {/* Associated Portfolio Project */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  Business Logo
+                <label className="block font-bold uppercase text-slate-700 mb-1">
+                  Associated Portfolio Project (MODULE 4)
                 </label>
-                <div className="flex items-center gap-3">
-                  {formData.business_logo_url && (
-                    <img
-                      src={getAssetUrl(formData.business_logo_url)}
-                      alt="Logo preview"
-                      className="w-12 h-12 rounded-xl object-contain bg-slate-50 border border-slate-200 p-1"
-                    />
-                  )}
-                  <input
-                    type="text"
-                    value={formData.business_logo_url}
-                    onChange={(e) => setFormData({ ...formData, business_logo_url: e.target.value })}
-                    placeholder="https://... or upload file"
-                    className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
-                  />
-                  <label className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer shrink-0">
-                    <Upload className="w-4 h-4 inline mr-1" />
-                    {uploadingLogo ? 'Uploading...' : 'Upload Logo'}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLogoUpload}
-                      disabled={uploadingLogo}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
+                <select
+                  value={formData.project_id || ''}
+                  onChange={(e) => setFormData({ ...formData, project_id: e.target.value ? Number(e.target.value) : null })}
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm bg-white text-slate-800"
+                >
+                  <option value="">-- No Direct Project Association --</option>
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} ({p.category})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Location
-                  </label>
+                  <label className="block font-bold uppercase text-slate-700 mb-1">Location</label>
                   <input
                     type="text"
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Client Website URL
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.website_url}
-                    onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Project Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.project_name}
-                    onChange={(e) => setFormData({ ...formData, project_name: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Rating (1 to 5 Stars) *
-                  </label>
-                  <div className="flex items-center gap-3 py-1">
-                    <RatingStars
-                      rating={formData.rating}
-                      size="md"
-                      interactive={true}
-                      onRatingChange={(r) => setFormData({ ...formData, rating: r })}
-                    />
-                    <span className="text-xs font-bold text-[#101B33]">
-                      {formData.rating} Stars
-                    </span>
-                  </div>
+                  <label className="block font-bold uppercase text-slate-700 mb-1">Status</label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm bg-white"
+                  >
+                    <option value="pending">Pending Moderation</option>
+                    <option value="approved">Approved &amp; Live</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  Project Description
-                </label>
-                <input
-                  type="text"
-                  value={formData.project_description}
-                  onChange={(e) => setFormData({ ...formData, project_description: e.target.value })}
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
-                />
+                <label className="block font-bold uppercase text-slate-700 mb-1">Rating (1 to 5 Stars)</label>
+                <div className="p-3 bg-[#F7F8FA] rounded-xl border border-slate-200 flex items-center justify-between">
+                  <RatingStars
+                    rating={formData.rating}
+                    size="md"
+                    interactive={true}
+                    onRatingChange={(newVal) => setFormData({ ...formData, rating: newVal })}
+                  />
+                  <span className="font-bold text-[#101B33]">{formData.rating} of 5 Stars</span>
+                </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  Client Review Text *
-                </label>
+                <label className="block font-bold uppercase text-slate-700 mb-1">Written Feedback *</label>
                 <textarea
                   required
                   rows={4}
                   value={formData.review_text}
                   onChange={(e) => setFormData({ ...formData, review_text: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm"
                 />
               </div>
 
-              {/* Status and Visibility Settings */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Moderation Status
-                  </label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold focus:outline-none focus:border-[#C6A15B]"
-                  >
-                    <option value="approved">Approved</option>
-                    <option value="pending">Pending</option>
-                    <option value="rejected">Rejected</option>
-                  </select>
-                </div>
-
-                <div className="flex items-center pt-4">
-                  <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
-                    <input
-                      type="checkbox"
-                      checked={formData.is_verified === 1}
-                      onChange={(e) => setFormData({ ...formData, is_verified: e.target.checked ? 1 : 0 })}
-                      className="w-4 h-4 rounded text-[#101B33]"
-                    />
-                    <span>Verified Badge</span>
-                  </label>
-                </div>
-
-                <div className="flex items-center pt-4">
-                  <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
-                    <input
-                      type="checkbox"
-                      checked={formData.is_visible === 1}
-                      onChange={(e) => setFormData({ ...formData, is_visible: e.target.checked ? 1 : 0 })}
-                      className="w-4 h-4 rounded text-[#101B33]"
-                    />
-                    <span>Show in Showcase</span>
-                  </label>
-                </div>
+              <div>
+                <label className="block font-bold uppercase text-slate-700 mb-1">Client Website URL</label>
+                <input
+                  type="url"
+                  value={formData.website_url}
+                  onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm"
+                />
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 grid grid-cols-2 gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.is_verified === 1}
+                    onChange={(e) => setFormData({ ...formData, is_verified: e.target.checked ? 1 : 0 })}
+                    className="w-4 h-4 text-emerald-600 rounded"
+                  />
+                  <span className="font-semibold text-slate-700">Verified Client Badge</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.is_visible === 1}
+                    onChange={(e) => setFormData({ ...formData, is_visible: e.target.checked ? 1 : 0 })}
+                    className="w-4 h-4 text-emerald-600 rounded"
+                  />
+                  <span className="font-semibold text-slate-700">Visible in Public Showcase</span>
+                </label>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
                 <button
                   type="button"
-                  onClick={() => { setIsEditModalOpen(false); setSelectedReview(null); }}
-                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#101B33] text-white hover:bg-[#1C2C4E] text-xs font-bold shadow-sm"
+                  className="px-5 py-2 rounded-xl bg-[#101B33] text-white hover:bg-[#1C2C4E] font-semibold"
                 >
                   Save Changes
                 </button>
@@ -1000,67 +991,55 @@ export const ReviewsTab: React.FC = () => {
         </div>
       )}
 
-      {/* Modal: Official Founder Response */}
+      {/* Modal: Founder Response */}
       {isResponseModalOpen && selectedReview && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200">
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 my-8 shadow-2xl border border-slate-200">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div>
                 <span className="text-xs uppercase font-bold tracking-widest text-[#C6A15B]">
-                  Official Executive Communication
+                  Official Founder Response
                 </span>
                 <h3 className="text-lg font-bold text-[#101B33]">
-                  Official Founder Response
+                  Reply to {selectedReview.business_name || selectedReview.reviewer_name}
                 </h3>
               </div>
-              <button
-                onClick={() => { setIsResponseModalOpen(false); setSelectedReview(null); }}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-lg"
-              >
+              <button onClick={() => setIsResponseModalOpen(false)} className="text-slate-400 hover:text-slate-700 font-bold">
                 ✕
               </button>
             </div>
 
-            <div className="my-4 p-3.5 rounded-xl bg-slate-50 border border-slate-100 text-xs">
-              <span className="font-bold text-[#101B33]">Client Review:</span>
-              <p className="text-slate-600 italic mt-0.5">
+            <form onSubmit={handleSaveFounderResponse} className="space-y-4 mt-6 text-xs">
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 italic text-slate-600">
                 "{selectedReview.review_text}"
-              </p>
-              <span className="block text-[11px] text-slate-400 mt-1">
-                — {selectedReview.reviewer_name} ({selectedReview.business_name || 'Individual'})
-              </span>
-            </div>
+              </div>
 
-            <form onSubmit={handleSaveFounderResponse} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  Response from Harish K, Founder &amp; CEO
+                <label className="block font-bold uppercase text-slate-700 mb-1">
+                  Harish K Official Response
                 </label>
                 <textarea
                   rows={4}
                   value={founderResponseText}
                   onChange={(e) => setFounderResponseText(e.target.value)}
-                  placeholder="Thank you for partnering with PIVO TECH! It was a pleasure collaborating on this project..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
+                  placeholder="Thank you for your feedback! It was an honor delivering your project..."
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
                 />
-                <p className="text-[10px] text-slate-400 mt-1">
-                  This official statement is displayed with a distinguished executive badge under the client's review. Leave blank and save to remove an existing response.
-                </p>
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+              <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
                 <button
                   type="button"
-                  onClick={() => { setIsResponseModalOpen(false); setSelectedReview(null); }}
-                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50"
+                  onClick={() => setIsResponseModalOpen(false)}
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#101B33] text-white hover:bg-[#1C2C4E] text-xs font-bold shadow-sm"
+                  className="px-5 py-2 rounded-xl bg-[#101B33] text-white hover:bg-[#1C2C4E] font-semibold"
                 >
-                  Save Official Response
+                  Publish Founder Response
                 </button>
               </div>
             </form>

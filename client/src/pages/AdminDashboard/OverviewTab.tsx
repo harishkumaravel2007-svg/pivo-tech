@@ -8,7 +8,9 @@ import {
   ShieldCheck,
   CheckCircle2,
   Clock,
-  ExternalLink
+  ExternalLink,
+  Star,
+  FileText
 } from 'lucide-react';
 import { api } from '../../services/api';
 import { AdminTab } from './DashboardLayout';
@@ -23,7 +25,12 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ setActiveTab }) => {
     enquiriesNew: 0,
     reviewsTotal: 0,
     reviewsPending: 0,
-    projectsCount: 0,
+    reviewsApproved: 0,
+    reviewsAverage: 5.0,
+    projectsTotal: 0,
+    projectsPublished: 0,
+    projectsDrafts: 0,
+    projectsFeatured: 0,
     servicesCount: 0,
     skillsCount: 0
   });
@@ -35,22 +42,27 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ setActiveTab }) => {
       try {
         const [enqRes, revRes, projRes, servRes, skillRes] = await Promise.all([
           api.getAdminEnquiries().catch(() => ({ enquiries: [], summary: { total: 0, new: 0 } })),
-          api.getAdminReviews().catch(() => ({ reviews: [], summary: { total: 0, pending: 0 } })),
-          api.getProjects().catch(() => ({ projects: [] })),
+          api.getAdminReviews().catch(() => ({ reviews: [], summary: { total: 0, pending: 0, approved: 0, rejected: 0, average: 5.0 } })),
+          api.getAllProjectsAdmin().catch(() => ({ projects: [], summary: { total: 0, published: 0, drafts: 0, featured: 0 } })),
           api.getServices().catch(() => ({ services: [] })),
           api.getSkills().catch(() => ({ skills: [] }))
         ]);
 
         setStats({
-          enquiriesTotal: enqRes.summary.total,
-          enquiriesNew: enqRes.summary.new,
-          reviewsTotal: revRes.summary.total,
-          reviewsPending: revRes.summary.pending,
-          projectsCount: projRes.projects.length,
-          servicesCount: servRes.services.length,
-          skillsCount: skillRes.skills.length
+          enquiriesTotal: enqRes.summary?.total || 0,
+          enquiriesNew: enqRes.summary?.new || 0,
+          reviewsTotal: revRes.summary?.total || 0,
+          reviewsPending: revRes.summary?.pending || 0,
+          reviewsApproved: revRes.summary?.approved || 0,
+          reviewsAverage: revRes.summary?.average || 5.0,
+          projectsTotal: projRes.summary?.total || projRes.projects?.length || 0,
+          projectsPublished: projRes.summary?.published || 0,
+          projectsDrafts: projRes.summary?.drafts || 0,
+          projectsFeatured: projRes.summary?.featured || 0,
+          servicesCount: servRes.services?.length || 0,
+          skillsCount: skillRes.skills?.length || 0
         });
-        setRecentEnquiries(enqRes.enquiries.slice(0, 5));
+        setRecentEnquiries(enqRes.enquiries ? enqRes.enquiries.slice(0, 5) : []);
       } catch (err) {
         console.error('Error fetching overview stats:', err);
       } finally {
@@ -92,7 +104,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ setActiveTab }) => {
             onClick={() => setActiveTab('projects')}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-[#1C2C4E] text-slate-200 hover:text-white transition-colors border border-slate-700/60"
           >
-            <span>Add New Project</span>
+            <span>Manage Portfolio</span>
           </button>
         </div>
       </div>
@@ -121,29 +133,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ setActiveTab }) => {
           </div>
         </div>
 
-        {/* Reviews Card */}
-        <div
-          onClick={() => setActiveTab('reviews')}
-          className="bg-white rounded-2xl p-6 border border-slate-200 shadow-subtle hover:border-[#C6A15B] cursor-pointer transition-all"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Reviews &amp; Ratings
-            </span>
-            <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-              <MessageSquare className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-3xl font-extrabold text-[#101B33]">
-            {stats.reviewsTotal}
-          </div>
-          <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5">
-            <span className="font-semibold text-amber-600">{stats.reviewsPending} pending</span>
-            <span>moderation</span>
-          </div>
-        </div>
-
-        {/* Projects Card */}
+        {/* Portfolio Projects Card */}
         <div
           onClick={() => setActiveTab('projects')}
           className="bg-white rounded-2xl p-6 border border-slate-200 shadow-subtle hover:border-[#C6A15B] cursor-pointer transition-all"
@@ -157,31 +147,59 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ setActiveTab }) => {
             </div>
           </div>
           <div className="text-3xl font-extrabold text-[#101B33]">
-            {stats.projectsCount}
+            {stats.projectsTotal}
           </div>
-          <div className="mt-2 text-xs text-slate-500">
-            Showcased on portfolio
+          <div className="mt-2 text-xs text-slate-500 flex items-center gap-2">
+            <span className="font-semibold text-emerald-600">{stats.projectsPublished} published</span>
+            <span>&bull;</span>
+            <span className="font-semibold text-amber-600">{stats.projectsDrafts} drafts</span>
           </div>
         </div>
 
-        {/* Services Card */}
+        {/* Client Reviews Card */}
         <div
-          onClick={() => setActiveTab('services')}
+          onClick={() => setActiveTab('reviews')}
           className="bg-white rounded-2xl p-6 border border-slate-200 shadow-subtle hover:border-[#C6A15B] cursor-pointer transition-all"
         >
           <div className="flex items-center justify-between mb-4">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Agency Services
+              Client Reviews
             </span>
-            <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-              <Layers className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <MessageSquare className="w-4 h-4" />
             </div>
           </div>
           <div className="text-3xl font-extrabold text-[#101B33]">
-            {stats.servicesCount}
+            {stats.reviewsTotal}
+          </div>
+          <div className="mt-2 text-xs text-slate-500 flex items-center justify-between">
+            <span className="font-semibold text-emerald-600">{stats.reviewsApproved} approved</span>
+            {stats.reviewsPending > 0 && (
+              <span className="font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full text-[10px]">
+                {stats.reviewsPending} pending
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Average Rating Card */}
+        <div
+          onClick={() => setActiveTab('reviews')}
+          className="bg-white rounded-2xl p-6 border border-slate-200 shadow-subtle hover:border-[#C6A15B] cursor-pointer transition-all"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              Average Rating
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+              <Star className="w-4 h-4 fill-purple-600 text-purple-600" />
+            </div>
+          </div>
+          <div className="text-3xl font-extrabold text-[#101B33]">
+            {stats.reviewsAverage > 0 ? stats.reviewsAverage.toFixed(1) : '5.0'} / 5.0
           </div>
           <div className="mt-2 text-xs text-slate-500">
-            Active service offerings
+            Across {stats.reviewsApproved} approved client testimonials
           </div>
         </div>
       </div>

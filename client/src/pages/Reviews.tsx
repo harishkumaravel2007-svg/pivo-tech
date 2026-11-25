@@ -12,14 +12,16 @@ import {
   Briefcase,
   UserCheck,
   CornerDownRight,
-  Sparkles
+  Sparkles,
+  FolderGit2
 } from 'lucide-react';
 import { api, getAssetUrl } from '../services/api';
-import { Review, ReviewStats } from '../types';
+import { Review, ReviewStats, Project } from '../types';
 import { RatingStars } from '../components/RatingStars';
 
 export const Reviews: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [stats, setStats] = useState<ReviewStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,6 +29,7 @@ export const Reviews: React.FC = () => {
   const [reviewerName, setReviewerName] = useState('');
   const [businessName, setBusinessName] = useState('');
   const [location, setLocation] = useState('');
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const [projectName, setProjectName] = useState('');
   const [projectDescription, setProjectDescription] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
@@ -55,7 +58,17 @@ export const Reviews: React.FC = () => {
   useEffect(() => {
     generateCaptcha();
     loadReviews();
+    loadProjects();
   }, []);
+
+  const loadProjects = async () => {
+    try {
+      const res = await api.getProjects();
+      setProjects(res.projects || []);
+    } catch (err) {
+      console.warn('Could not fetch portfolio projects for review dropdown:', err);
+    }
+  };
 
   const loadReviews = async () => {
     try {
@@ -66,6 +79,26 @@ export const Reviews: React.FC = () => {
       console.error('Error fetching reviews:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleProjectSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    if (!val || val === 'custom') {
+      setSelectedProjectId(null);
+    } else {
+      const pId = Number(val);
+      setSelectedProjectId(pId);
+      const matched = projects.find(p => p.id === pId);
+      if (matched) {
+        setProjectName(matched.name);
+        if (matched.client_name && !businessName) {
+          setBusinessName(matched.client_name);
+        }
+        if (matched.live_url && !websiteUrl) {
+          setWebsiteUrl(matched.live_url);
+        }
+      }
     }
   };
 
@@ -119,13 +152,15 @@ export const Reviews: React.FC = () => {
         review_text: reviewText.trim(),
         honeypot,
         captcha_answer: Number(captchaAnswer),
-        captcha_expected: num1 + num2
+        captcha_expected: num1 + num2,
+        project_id: selectedProjectId || undefined
       });
 
       setSuccessMessage(res.message);
       setReviewerName('');
       setBusinessName('');
       setLocation('');
+      setSelectedProjectId(null);
       setProjectName('');
       setProjectDescription('');
       setWebsiteUrl('');
@@ -302,16 +337,22 @@ export const Reviews: React.FC = () => {
                       </div>
 
                       {/* Project Details Section */}
-                      {(rev.project_name || rev.project_description) && (
+                      {(rev.linked_project_name || rev.project_name || rev.project_description) && (
                         <div className="my-5 p-4 rounded-xl bg-slate-50/80 border border-slate-100">
-                          {rev.project_name && (
+                          {rev.linked_project_name && (
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 mb-2 w-fit">
+                              <FolderGit2 className="w-3.5 h-3.5 text-[#C6A15B]" />
+                              <span>Verified Portfolio Project: {rev.linked_project_name}</span>
+                            </div>
+                          )}
+                          {rev.project_name && !rev.linked_project_name && (
                             <div className="flex items-center gap-2 text-xs font-bold text-[#101B33] mb-1">
                               <Briefcase className="w-3.5 h-3.5 text-[#C6A15B]" />
                               <span>Project: {rev.project_name}</span>
                             </div>
                           )}
                           {rev.project_description && (
-                            <p className="text-xs text-slate-600 leading-relaxed pl-5">
+                            <p className="text-xs text-slate-600 leading-relaxed pl-1">
                               {rev.project_description}
                             </p>
                           )}
@@ -496,6 +537,28 @@ export const Reviews: React.FC = () => {
                     placeholder="e.g. Bangalore, India"
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B] focus:ring-1 focus:ring-[#C6A15B]"
                   />
+                </div>
+
+                {/* Associated Portfolio Project (Optional) */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    Associated Portfolio Project (Optional)
+                  </label>
+                  <select
+                    value={selectedProjectId || 'custom'}
+                    onChange={handleProjectSelect}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B] focus:ring-1 focus:ring-[#C6A15B] bg-white text-slate-800"
+                  >
+                    <option value="custom">-- Select a Portfolio Project (or enter custom below) --</option>
+                    {projects.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} ({p.category})
+                      </option>
+                    ))}
+                  </select>
+                  <span className="text-[10px] text-slate-400">
+                    Selecting your project links this testimonial directly to its portfolio case study.
+                  </span>
                 </div>
 
                 {/* Project Name */}

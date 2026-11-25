@@ -8,23 +8,30 @@ import {
   ArrowRight,
   Info,
   CheckCircle2,
-  FolderGit2
+  FolderGit2,
+  Star,
+  UserCheck,
+  Building2,
+  Sparkles,
+  Image as ImageIcon
 } from 'lucide-react';
 import { api, getAssetUrl } from '../services/api';
 import { Project } from '../types';
 import { Modal } from '../components/Modal';
 import { EmptyState } from '../components/EmptyState';
+import { RatingStars } from '../components/RatingStars';
 
 export const Portfolio: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [activeImage, setActiveImage] = useState<string>('');
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [loading, setLoading] = useState(true);
 
   const categories = [
     'All',
     'Business Websites',
-    'E-commerce',
+    'E-commerce Websites',
     'Web Applications',
     'AI Solutions',
     'Business Automation'
@@ -36,6 +43,11 @@ export const Portfolio: React.FC = () => {
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
   }, []);
+
+  const openProjectModal = (proj: Project) => {
+    setSelectedProject(proj);
+    setActiveImage(proj.image_url);
+  };
 
   const filteredProjects = activeCategory === 'All'
     ? projects
@@ -169,7 +181,7 @@ export const Portfolio: React.FC = () => {
                   <div>
                     <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
                       <button
-                        onClick={() => setSelectedProject(project)}
+                        onClick={() => openProjectModal(project)}
                         className="inline-flex items-center gap-1.5 text-xs font-bold text-[#101B33] hover:text-[#C6A15B] transition-colors"
                       >
                         <span>View Details</span>
@@ -238,23 +250,87 @@ export const Portfolio: React.FC = () => {
           maxWidth="2xl"
         >
           <div className="space-y-6">
-            <div className="aspect-video w-full rounded-xl overflow-hidden bg-[#101B33]">
+            {/* Active Image Display */}
+            <div className="aspect-video w-full rounded-2xl overflow-hidden bg-[#101B33] border border-slate-200 shadow-sm relative group">
               <img
-                src={getAssetUrl(selectedProject.image_url)}
+                src={getAssetUrl(activeImage || selectedProject.image_url)}
                 alt={selectedProject.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-all duration-300"
               />
             </div>
 
+            {/* Screenshots Gallery Strip (if screenshots available) */}
+            {((selectedProject.screenshots && selectedProject.screenshots.length > 0) || selectedProject.image_url) && (
+              <div>
+                <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                  <ImageIcon className="w-3.5 h-3.5 text-[#C6A15B]" />
+                  <span>Interactive Visual Gallery</span>
+                </div>
+                <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                  {/* Main thumbnail option */}
+                  <button
+                    type="button"
+                    onClick={() => setActiveImage(selectedProject.image_url)}
+                    className={`w-20 h-14 rounded-xl overflow-hidden shrink-0 border-2 transition-all ${
+                      (activeImage === selectedProject.image_url || !activeImage)
+                        ? 'border-[#C6A15B] shadow-md scale-105'
+                        : 'border-slate-200 opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <img
+                      src={getAssetUrl(selectedProject.image_url)}
+                      alt="Main Cover"
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+
+                  {/* Screenshots */}
+                  {selectedProject.screenshots?.map((shot, sIdx) => (
+                    <button
+                      key={sIdx}
+                      type="button"
+                      onClick={() => setActiveImage(shot)}
+                      className={`w-20 h-14 rounded-xl overflow-hidden shrink-0 border-2 transition-all ${
+                        activeImage === shot
+                          ? 'border-[#C6A15B] shadow-md scale-105'
+                          : 'border-slate-200 opacity-70 hover:opacity-100'
+                      }`}
+                    >
+                      <img
+                        src={getAssetUrl(shot)}
+                        alt={`Screenshot ${sIdx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Badges row: Category, Client, Concept vs Real */}
             <div className="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-slate-100 text-xs">
-              <span className="font-bold uppercase tracking-wider text-[#C6A15B]">
-                {selectedProject.category}
-              </span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-bold uppercase tracking-wider text-[#C6A15B]">
+                  {selectedProject.category}
+                </span>
+                {selectedProject.client_name && (
+                  <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-800 font-bold border border-slate-200 flex items-center gap-1">
+                    <Building2 className="w-3 h-3 text-slate-600" />
+                    <span>Client: {selectedProject.client_name}</span>
+                  </span>
+                )}
+              </div>
+
               {selectedProject.is_demo_concept ? (
                 <span className="px-2.5 py-1 rounded bg-amber-100 text-amber-900 font-bold border border-amber-300">
                   Concept Demonstration (Not A Client Project)
                 </span>
-              ) : null}
+              ) : (
+                <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300 flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Verified Client Project</span>
+                </span>
+              )}
             </div>
 
             {selectedProject.is_demo_concept ? (
@@ -266,6 +342,7 @@ export const Portfolio: React.FC = () => {
               </div>
             ) : null}
 
+            {/* Project Overview */}
             <div>
               <h4 className="text-xs uppercase font-bold tracking-wider text-slate-400 mb-1">
                 Project Overview
@@ -275,6 +352,27 @@ export const Portfolio: React.FC = () => {
               </p>
             </div>
 
+            {/* Key Features Implemented (MODULE 1 & 2) */}
+            {selectedProject.features && selectedProject.features.length > 0 && (
+              <div>
+                <h4 className="text-xs uppercase font-bold tracking-wider text-slate-400 mb-2">
+                  Key Features Implemented
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {selectedProject.features.map((feat, fIdx) => (
+                    <div
+                      key={fIdx}
+                      className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-800 flex items-start gap-2"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                      <span>{feat}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Case Study / Full Architecture */}
             {selectedProject.case_study && (
               <div>
                 <h4 className="text-xs uppercase font-bold tracking-wider text-slate-400 mb-1">
@@ -286,6 +384,7 @@ export const Portfolio: React.FC = () => {
               </div>
             )}
 
+            {/* Technologies Used */}
             <div>
               <h4 className="text-xs uppercase font-bold tracking-wider text-slate-400 mb-2">
                 Technologies Used
@@ -302,6 +401,48 @@ export const Portfolio: React.FC = () => {
               </div>
             </div>
 
+            {/* MODULE 4: Linked Approved Client Review Showcase */}
+            {selectedProject.related_reviews && selectedProject.related_reviews.length > 0 && (
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-50/70 to-orange-50/40 border border-amber-200/80 shadow-sm">
+                <div className="flex items-center gap-2 mb-3">
+                  <Star className="w-4 h-4 text-[#C6A15B] fill-[#C6A15B]" />
+                  <h4 className="text-xs uppercase font-bold tracking-wider text-amber-950">
+                    Verified Client Testimonial For This Project
+                  </h4>
+                </div>
+
+                {selectedProject.related_reviews.map((r, rIdx) => (
+                  <div key={rIdx} className="bg-white rounded-xl p-4 border border-amber-100 shadow-subtle space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-[#101B33]">
+                            {r.business_name || r.reviewer_name}
+                          </span>
+                          {r.is_verified === 1 && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                              <UserCheck className="w-2.5 h-2.5 text-emerald-600" />
+                              Verified
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-slate-500 mt-0.5">
+                          Reviewed by {r.reviewer_name} {r.location && `• ${r.location}`}
+                        </div>
+                      </div>
+
+                      <RatingStars rating={r.rating} size="sm" />
+                    </div>
+
+                    <blockquote className="text-xs sm:text-sm text-slate-700 italic border-l-2 border-[#C6A15B] pl-3 py-0.5 leading-relaxed">
+                      "{r.review_text}"
+                    </blockquote>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Footer actions */}
             <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
               <div className="flex flex-wrap items-center gap-3">
                 {selectedProject.live_url && (

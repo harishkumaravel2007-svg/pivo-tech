@@ -54,19 +54,58 @@ const upload = multer({
 
 const router = express.Router();
 
+// Single file upload
 router.post('/', requireAdmin, upload.single('file'), (req, res) => {
   if (!req.file) {
-    return res.status(400).json({ error: 'No file was uploaded.' });
+    return res.status(400).json({ success: false, error: 'No file was uploaded.' });
   }
 
   const fileUrl = `/uploads/${req.file.filename}`;
   res.json({
+    success: true,
     message: 'File uploaded successfully.',
     url: fileUrl,
     filename: req.file.filename,
     originalName: req.file.originalname,
     size: req.file.size
   });
+});
+
+// Multiple files upload (e.g. project screenshots and gallery images)
+router.post('/multiple', requireAdmin, upload.array('files', 10), (req, res) => {
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ success: false, error: 'No files were uploaded.' });
+  }
+
+  const uploadedFiles = req.files.map(f => ({
+    url: `/uploads/${f.filename}`,
+    filename: f.filename,
+    originalName: f.originalname,
+    size: f.size
+  }));
+
+  res.json({
+    success: true,
+    message: `${uploadedFiles.length} files uploaded successfully.`,
+    files: uploadedFiles
+  });
+});
+
+// Delete uploaded image with path traversal protection
+router.delete('/:filename', requireAdmin, (req, res) => {
+  const safeFilename = path.basename(req.params.filename);
+  const filePath = path.join(UPLOADS_DIR, safeFilename);
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ success: false, error: 'File not found.' });
+  }
+
+  try {
+    fs.unlinkSync(filePath);
+    res.json({ success: true, message: 'File deleted successfully.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to delete file from storage.' });
+  }
 });
 
 export default router;

@@ -27,27 +27,41 @@ function normalizeAndValidateUrl(url) {
 
 // Public: Get approved & visible reviews for public showcase & live statistics
 router.get('/', (req, res) => {
-  const reviews = db.prepare(`
+  const { project_id } = req.query;
+  let query = `
     SELECT
-      id,
-      reviewer_name,
-      business_name,
-      business_logo_url,
-      location,
-      project_name,
-      project_description,
-      rating,
-      review_text,
-      website_url,
-      is_verified,
-      founder_response,
-      founder_responded_at,
-      created_by,
-      created_at
-    FROM reviews
-    WHERE status = 'approved' AND (is_visible = 1 OR is_visible IS NULL)
-    ORDER BY is_verified DESC, id DESC
-  `).all();
+      r.id,
+      r.review_id,
+      r.project_id,
+      r.reviewer_name,
+      r.business_name,
+      r.business_logo_url,
+      r.location,
+      r.project_name,
+      r.project_description,
+      r.rating,
+      r.review_text,
+      r.website_url,
+      r.is_verified,
+      r.founder_response,
+      r.founder_responded_at,
+      r.created_by,
+      r.created_at,
+      p.name as linked_project_name,
+      p.slug as linked_project_slug
+    FROM reviews r
+    LEFT JOIN projects p ON r.project_id = p.id
+    WHERE r.status = 'approved' AND (r.is_visible = 1 OR r.is_visible IS NULL)
+  `;
+  const params = [];
+
+  if (project_id) {
+    query += ' AND r.project_id = ?';
+    params.push(project_id);
+  }
+
+  query += ' ORDER BY r.is_verified DESC, r.id DESC';
+  const reviews = db.prepare(query).all(...params);
 
   const stats = db.prepare(`
     SELECT
@@ -63,6 +77,7 @@ router.get('/', (req, res) => {
   `).get();
 
   res.json({
+    success: true,
     reviews,
     stats: {
       total: stats.total_reviews || 0,
@@ -78,12 +93,13 @@ router.get('/', (req, res) => {
   });
 });
 
-// Public: Submit a review (Enters pending status awaiting moderation)
+// Public: Submit a client review (Enters pending status awaiting moderation)
 router.post('/submit', rateLimiter(60000, 10), (req, res) => {
   const {
     reviewer_name,
     business_name,
     location,
+    project_id,
     project_name,
     project_description,
     website_url,
@@ -125,10 +141,22 @@ router.post('/submit', rateLimiter(60000, 10), (req, res) => {
     }
   }
 
+  // Verify related project_id if passed
+  let validProjectId = null;
+  let finalProjectName = project_name ? project_name.trim() : null;
+  if (project_id) {
+    const proj = db.prepare('SELECT id, name FROM projects WHERE id = ?').get(project_id);
+    if (proj) {
+      validProjectId = proj.id;
+      if (!finalProjectName) finalProjectName = proj.name;
+    }
+  }
+
   const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
   const now = new Date().toISOString();
+  const reviewId = `PIVO-REV-${Date.now().toString().slice(-6)}`;
 
-  // Spam & duplicate prevention: check for identical review text or same IP/business within last 24h
+  // Spam & duplicate prevention
   const existingDuplicate = db.prepare(`
     SELECT id FROM reviews
     WHERE (reviewer_name = ? AND review_text = ?)
@@ -148,8 +176,10 @@ router.post('/submit', rateLimiter(60000, 10), (req, res) => {
     });
   }
 
-  db.prepare(`
+  const result = db.prepare(`
     INSERT INTO reviews (
+      review_id,
+      project_id,
       reviewer_name,
       business_name,
       location,
@@ -165,12 +195,14 @@ router.post('/submit', rateLimiter(60000, 10), (req, res) => {
       client_ip,
       created_at,
       updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 1, 0, 'client', ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 1, 0, 'client', ?, ?, ?)
   `).run(
+    reviewId,
+    validProjectId,
     reviewer_name.trim(),
     business_name ? business_name.trim() : null,
     location ? location.trim() : null,
-    project_name ? project_name.trim() : null,
+    finalProjectName,
     project_description ? project_description.trim() : null,
     cleanWebsiteUrl,
     numericRating,
@@ -182,15 +214,46 @@ router.post('/submit', rateLimiter(60000, 10), (req, res) => {
 
   res.status(201).json({
     success: true,
-    message: 'Thank you for your review! It has been received and entered pending moderation. Once verified by the PIVO TECH team, it will appear publicly.'
+    message: 'Thank you for your review! It has been received and entered pending moderation. Once verified by the PIVO TECH team, it will appear publicly.',
+    review_id: reviewId,
+    reviewId,
+    id: result.lastInsertRowid
   });
 });
 
-// Admin: Get all reviews with full audit fields and moderation summary
+// Admin: Get all reviews with moderation summary, project linking info, search and filter
 router.get('/admin/all', requireAdmin, (req, res) => {
-  const reviews = db.prepare(`
-    SELECT * FROM reviews ORDER BY id DESC
-  `).all();
+  const { status, project_id, q } = req.query;
+
+  let query = `
+    SELECT
+      r.*,
+      p.name as linked_project_name,
+      p.slug as linked_project_slug
+    FROM reviews r
+    LEFT JOIN projects p ON r.project_id = p.id
+    WHERE 1=1
+  `;
+  const params = [];
+
+  if (status && status !== 'all') {
+    query += ' AND r.status = ?';
+    params.push(status);
+  }
+
+  if (project_id && project_id !== 'all') {
+    query += ' AND r.project_id = ?';
+    params.push(project_id);
+  }
+
+  if (q && q.trim()) {
+    query += ' AND (r.reviewer_name LIKE ? OR r.business_name LIKE ? OR r.review_text LIKE ? OR r.review_id LIKE ? OR p.name LIKE ?)';
+    const pattern = `%${q.trim()}%`;
+    params.push(pattern, pattern, pattern, pattern, pattern);
+  }
+
+  query += ' ORDER BY r.id DESC';
+  const reviews = db.prepare(query).all(...params);
 
   const counts = db.prepare(`
     SELECT
@@ -203,6 +266,7 @@ router.get('/admin/all', requireAdmin, (req, res) => {
   `).get();
 
   res.json({
+    success: true,
     reviews,
     summary: {
       total: counts.total || 0,
@@ -214,13 +278,14 @@ router.get('/admin/all', requireAdmin, (req, res) => {
   });
 });
 
-// Admin / Founder: Add genuine client review received with permission
+// Admin / Founder: Add genuine client review directly
 router.post('/admin/add', requireAdmin, (req, res) => {
   const {
     reviewer_name,
     business_name,
     business_logo_url,
     location,
+    project_id,
     project_name,
     project_description,
     rating,
@@ -232,31 +297,44 @@ router.post('/admin/add', requireAdmin, (req, res) => {
   } = req.body;
 
   if (!reviewer_name || !reviewer_name.trim()) {
-    return res.status(400).json({ error: 'Client or reviewer name is required.' });
+    return res.status(400).json({ success: false, error: 'Client or reviewer name is required.' });
   }
 
   const numericRating = Number(rating);
   if (!numericRating || numericRating < 1 || numericRating > 5) {
-    return res.status(400).json({ error: 'Rating must be between 1 and 5 stars.' });
+    return res.status(400).json({ success: false, error: 'Rating must be between 1 and 5 stars.' });
   }
 
   if (!review_text || !review_text.trim()) {
-    return res.status(400).json({ error: 'Client review text is required.' });
+    return res.status(400).json({ success: false, error: 'Client review text is required.' });
   }
 
   let cleanWebsiteUrl = null;
   if (website_url && website_url.trim()) {
     cleanWebsiteUrl = normalizeAndValidateUrl(website_url);
     if (!cleanWebsiteUrl) {
-      return res.status(400).json({ error: 'Please provide a valid website URL.' });
+      return res.status(400).json({ success: false, error: 'Please provide a valid website URL.' });
+    }
+  }
+
+  let validProjectId = null;
+  let finalProjectName = project_name ? project_name.trim() : null;
+  if (project_id) {
+    const proj = db.prepare('SELECT id, name FROM projects WHERE id = ?').get(project_id);
+    if (proj) {
+      validProjectId = proj.id;
+      if (!finalProjectName) finalProjectName = proj.name;
     }
   }
 
   const now = new Date().toISOString();
+  const reviewId = `PIVO-REV-${Date.now().toString().slice(-6)}`;
   const founderRespondedAt = founder_response && founder_response.trim() ? now : null;
 
   const result = db.prepare(`
     INSERT INTO reviews (
+      review_id,
+      project_id,
       reviewer_name,
       business_name,
       business_logo_url,
@@ -276,13 +354,15 @@ router.post('/admin/add', requireAdmin, (req, res) => {
       client_ip,
       created_at,
       updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'approved', ?, ?, ?, ?, ?, 'founder', 'admin-console', ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'approved', ?, ?, ?, ?, ?, 'founder', 'admin-console', ?, ?)
   `).run(
+    reviewId,
+    validProjectId,
     reviewer_name.trim(),
     business_name ? business_name.trim() : null,
     business_logo_url ? business_logo_url.trim() : null,
     location ? location.trim() : null,
-    project_name ? project_name.trim() : null,
+    finalProjectName,
     project_description ? project_description.trim() : null,
     numericRating,
     review_text.trim(),
@@ -298,12 +378,13 @@ router.post('/admin/add', requireAdmin, (req, res) => {
 
   const inserted = db.prepare('SELECT * FROM reviews WHERE id = ?').get(result.lastInsertRowid);
   res.status(201).json({
+    success: true,
     message: 'Client review record created and published successfully.',
     review: inserted
   });
 });
 
-// Admin: Edit existing client review record
+// Admin: Edit existing review
 router.put('/admin/:id', requireAdmin, (req, res) => {
   const { id } = req.params;
   const {
@@ -311,6 +392,7 @@ router.put('/admin/:id', requireAdmin, (req, res) => {
     business_name,
     business_logo_url,
     location,
+    project_id,
     project_name,
     project_description,
     rating,
@@ -324,20 +406,30 @@ router.put('/admin/:id', requireAdmin, (req, res) => {
 
   const existing = db.prepare('SELECT * FROM reviews WHERE id = ?').get(id);
   if (!existing) {
-    return res.status(404).json({ error: 'Review record not found.' });
+    return res.status(404).json({ success: false, error: 'Review record not found.' });
   }
 
   let cleanWebsiteUrl = existing.website_url;
   if (website_url !== undefined) {
     cleanWebsiteUrl = website_url && website_url.trim() ? normalizeAndValidateUrl(website_url) : null;
     if (website_url && website_url.trim() && !cleanWebsiteUrl) {
-      return res.status(400).json({ error: 'Invalid website URL format.' });
+      return res.status(400).json({ success: false, error: 'Invalid website URL format.' });
     }
   }
 
   const numericRating = rating !== undefined ? Number(rating) : existing.rating;
   if (numericRating < 1 || numericRating > 5) {
-    return res.status(400).json({ error: 'Rating must be between 1 and 5.' });
+    return res.status(400).json({ success: false, error: 'Rating must be between 1 and 5.' });
+  }
+
+  let validProjectId = existing.project_id;
+  if (project_id !== undefined) {
+    if (project_id) {
+      const proj = db.prepare('SELECT id FROM projects WHERE id = ?').get(project_id);
+      validProjectId = proj ? proj.id : null;
+    } else {
+      validProjectId = null;
+    }
   }
 
   const now = new Date().toISOString();
@@ -357,6 +449,7 @@ router.put('/admin/:id', requireAdmin, (req, res) => {
       business_name = COALESCE(?, business_name),
       business_logo_url = ?,
       location = ?,
+      project_id = ?,
       project_name = ?,
       project_description = ?,
       rating = ?,
@@ -375,6 +468,7 @@ router.put('/admin/:id', requireAdmin, (req, res) => {
     business_name !== undefined ? (business_name ? business_name.trim() : null) : existing.business_name,
     business_logo_url !== undefined ? (business_logo_url ? business_logo_url.trim() : null) : existing.business_logo_url,
     location !== undefined ? (location ? location.trim() : null) : existing.location,
+    validProjectId,
     project_name !== undefined ? (project_name ? project_name.trim() : null) : existing.project_name,
     project_description !== undefined ? (project_description ? project_description.trim() : null) : existing.project_description,
     numericRating,
@@ -394,8 +488,46 @@ router.put('/admin/:id', requireAdmin, (req, res) => {
 
   const updated = db.prepare('SELECT * FROM reviews WHERE id = ?').get(id);
   res.json({
+    success: true,
     message: 'Client review record updated successfully.',
     review: updated
+  });
+});
+
+// Admin: Link or unlink a review to a portfolio project
+router.patch('/admin/:id/link-project', requireAdmin, (req, res) => {
+  const { id } = req.params;
+  const { project_id } = req.body;
+
+  const existing = db.prepare('SELECT id FROM reviews WHERE id = ?').get(id);
+  if (!existing) {
+    return res.status(404).json({ success: false, error: 'Review not found.' });
+  }
+
+  let validProjectId = null;
+  let projectName = null;
+  if (project_id) {
+    const proj = db.prepare('SELECT id, name FROM projects WHERE id = ?').get(project_id);
+    if (!proj) {
+      return res.status(400).json({ success: false, error: 'Target portfolio project does not exist.' });
+    }
+    validProjectId = proj.id;
+    projectName = proj.name;
+  }
+
+  const now = new Date().toISOString();
+  db.prepare(`
+    UPDATE reviews SET
+      project_id = ?,
+      project_name = COALESCE(?, project_name),
+      updated_at = ?
+    WHERE id = ?
+  `).run(validProjectId, projectName, now, id);
+
+  res.json({
+    success: true,
+    message: validProjectId ? `Review linked to portfolio project "${projectName}".` : 'Review unlinked from project.',
+    project_id: validProjectId
   });
 });
 
@@ -405,12 +537,12 @@ router.patch('/admin/:id/status', requireAdmin, (req, res) => {
   const { status, is_verified, is_visible } = req.body;
 
   if (status && !['pending', 'approved', 'rejected'].includes(status)) {
-    return res.status(400).json({ error: 'Status must be one of: pending, approved, rejected.' });
+    return res.status(400).json({ success: false, error: 'Status must be one of: pending, approved, rejected.' });
   }
 
   const existing = db.prepare('SELECT * FROM reviews WHERE id = ?').get(id);
   if (!existing) {
-    return res.status(404).json({ error: 'Review not found.' });
+    return res.status(404).json({ success: false, error: 'Review not found.' });
   }
 
   const now = new Date().toISOString();
@@ -438,7 +570,7 @@ router.patch('/admin/:id/status', requireAdmin, (req, res) => {
     id
   );
 
-  res.json({ message: 'Review moderation updated successfully.' });
+  res.json({ success: true, message: 'Review moderation updated successfully.' });
 });
 
 // Admin / Founder: Add or update official Founder Response to a client review
@@ -448,7 +580,7 @@ router.patch('/admin/:id/founder-response', requireAdmin, (req, res) => {
 
   const existing = db.prepare('SELECT * FROM reviews WHERE id = ?').get(id);
   if (!existing) {
-    return res.status(404).json({ error: 'Review not found.' });
+    return res.status(404).json({ success: false, error: 'Review not found.' });
   }
 
   const now = new Date().toISOString();
@@ -464,6 +596,7 @@ router.patch('/admin/:id/founder-response', requireAdmin, (req, res) => {
   `).run(trimmed, respondedAt, now, id);
 
   res.json({
+    success: true,
     message: trimmed ? 'Official founder response saved successfully.' : 'Founder response removed successfully.',
     founder_response: trimmed,
     founder_responded_at: respondedAt
@@ -476,10 +609,10 @@ router.delete('/admin/:id', requireAdmin, (req, res) => {
   const info = db.prepare('DELETE FROM reviews WHERE id = ?').run(id);
 
   if (info.changes === 0) {
-    return res.status(404).json({ error: 'Review not found.' });
+    return res.status(404).json({ success: false, error: 'Review not found.' });
   }
 
-  res.json({ message: 'Review deleted successfully.' });
+  res.json({ success: true, message: 'Review deleted successfully.' });
 });
 
 export default router;

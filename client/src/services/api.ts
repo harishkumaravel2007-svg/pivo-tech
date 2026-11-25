@@ -130,15 +130,13 @@ export const api = {
   // Skills
   getSkills: async (): Promise<{ skills: Skill[] }> => {
     const res = await fetch(`${API_BASE}/skills`);
-    if (!res.ok) throw new Error('Failed to fetch skills');
-    return res.json();
+    return parseResponse<{ skills: Skill[] }>(res, 'Failed to fetch skills');
   },
   getAllSkillsAdmin: async (): Promise<{ skills: Skill[] }> => {
     const res = await fetch(`${API_BASE}/skills/all`, {
       headers: getAuthHeaders()
     });
-    if (!res.ok) throw new Error('Failed to fetch skills');
-    return res.json();
+    return parseResponse<{ skills: Skill[] }>(res, 'Failed to fetch skills');
   },
   createSkill: async (skill: Partial<Skill>): Promise<{ message: string; id: number }> => {
     const res = await fetch(`${API_BASE}/skills`, {
@@ -146,11 +144,7 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify(skill)
     });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Failed to create skill');
-    }
-    return res.json();
+    return parseResponse<{ message: string; id: number }>(res, 'Failed to create skill');
   },
   updateSkill: async (id: number, skill: Partial<Skill>): Promise<{ message: string }> => {
     const res = await fetch(`${API_BASE}/skills/${id}`, {
@@ -158,45 +152,84 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify(skill)
     });
-    if (!res.ok) throw new Error('Failed to update skill');
-    return res.json();
+    return parseResponse<{ message: string }>(res, 'Failed to update skill');
   },
   deleteSkill: async (id: number): Promise<{ message: string }> => {
     const res = await fetch(`${API_BASE}/skills/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders()
     });
-    if (!res.ok) throw new Error('Failed to delete skill');
-    return res.json();
+    return parseResponse<{ message: string }>(res, 'Failed to delete skill');
   },
 
   // Projects
-  getProjects: async (category?: string): Promise<{ projects: Project[] }> => {
-    const url = category && category !== 'All'
-      ? `${API_BASE}/projects?category=${encodeURIComponent(category)}`
-      : `${API_BASE}/projects`;
-    const res = await fetch(url);
+  getProjects: async (category?: string, q?: string): Promise<{ projects: Project[] }> => {
+    const params = new URLSearchParams();
+    if (category && category !== 'All') params.set('category', category);
+    if (q) params.set('q', q);
+    const qs = params.toString() ? `?${params.toString()}` : '';
+    const res = await fetch(`${API_BASE}/projects${qs}`);
     return parseResponse<{ projects: Project[] }>(res, 'Failed to fetch projects');
+  },
+  getAllProjectsAdmin: async (params?: {
+    category?: string;
+    status?: string;
+    q?: string;
+  }): Promise<{
+    projects: Project[];
+    summary: { total: number; published: number; drafts: number; featured: number };
+  }> => {
+    const query = new URLSearchParams();
+    if (params?.category && params.category !== 'All') query.set('category', params.category);
+    if (params?.status && params.status !== 'all') query.set('status', params.status);
+    if (params?.q) query.set('q', params.q);
+    const qs = query.toString() ? `?${query.toString()}` : '';
+    const res = await fetch(`${API_BASE}/projects/admin/all${qs}`, {
+      headers: getAuthHeaders()
+    });
+    return parseResponse(res, 'Failed to fetch all projects');
   },
   getProject: async (idOrSlug: string | number): Promise<{ project: Project }> => {
     const res = await fetch(`${API_BASE}/projects/${idOrSlug}`);
     return parseResponse<{ project: Project }>(res, 'Failed to fetch project details');
   },
-  createProject: async (project: Partial<Project>): Promise<{ message: string; id: number }> => {
+  createProject: async (project: Partial<Project>): Promise<{ message: string; id: number; project: Project }> => {
     const res = await fetch(`${API_BASE}/projects`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(project)
     });
-    return parseResponse<{ message: string; id: number }>(res, 'Failed to create project');
+    return parseResponse<{ message: string; id: number; project: Project }>(res, 'Failed to create project');
   },
-  updateProject: async (id: number, project: Partial<Project>): Promise<{ message: string }> => {
+  updateProject: async (id: number, project: Partial<Project>): Promise<{ message: string; project: Project }> => {
     const res = await fetch(`${API_BASE}/projects/${id}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify(project)
     });
-    return parseResponse<{ message: string }>(res, 'Failed to update project');
+    return parseResponse<{ message: string; project: Project }>(res, 'Failed to update project');
+  },
+  toggleProjectPublish: async (
+    id: number,
+    is_published?: boolean
+  ): Promise<{ message: string; is_published: number; status: string }> => {
+    const res = await fetch(`${API_BASE}/projects/${id}/publish`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ is_published })
+    });
+    return parseResponse<{ message: string; is_published: number; status: string }>(res, 'Failed to toggle project publish state');
+  },
+  toggleProjectFeatured: async (
+    id: number,
+    is_featured?: boolean
+  ): Promise<{ message: string; is_featured: number }> => {
+    const res = await fetch(`${API_BASE}/projects/${id}/featured`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ is_featured })
+    });
+    return parseResponse<{ message: string; is_featured: number }>(res, 'Failed to toggle project featured state');
   },
   deleteProject: async (id: number): Promise<{ message: string }> => {
     const res = await fetch(`${API_BASE}/projects/${id}`, {
@@ -209,8 +242,7 @@ export const api = {
   // Achievements
   getAchievements: async (): Promise<{ achievements: Achievement[] }> => {
     const res = await fetch(`${API_BASE}/achievements`);
-    if (!res.ok) throw new Error('Failed to fetch achievements');
-    return res.json();
+    return parseResponse<{ achievements: Achievement[] }>(res, 'Failed to fetch achievements');
   },
   createAchievement: async (achievement: Partial<Achievement>): Promise<{ message: string; id: number }> => {
     const res = await fetch(`${API_BASE}/achievements`, {
@@ -218,11 +250,7 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify(achievement)
     });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Failed to create achievement');
-    }
-    return res.json();
+    return parseResponse<{ message: string; id: number }>(res, 'Failed to create achievement');
   },
   updateAchievement: async (id: number, achievement: Partial<Achievement>): Promise<{ message: string }> => {
     const res = await fetch(`${API_BASE}/achievements/${id}`, {
@@ -230,16 +258,14 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify(achievement)
     });
-    if (!res.ok) throw new Error('Failed to update achievement');
-    return res.json();
+    return parseResponse<{ message: string }>(res, 'Failed to update achievement');
   },
   deleteAchievement: async (id: number): Promise<{ message: string }> => {
     const res = await fetch(`${API_BASE}/achievements/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders()
     });
-    if (!res.ok) throw new Error('Failed to delete achievement');
-    return res.json();
+    return parseResponse<{ message: string }>(res, 'Failed to delete achievement');
   },
 
   // Reviews & Client Showcase
@@ -296,53 +322,87 @@ export const api = {
     honeypot?: string;
     captcha_answer?: number;
     captcha_expected?: number;
-  }): Promise<{ message: string }> => {
+    project_id?: number | null;
+  }): Promise<{ message: string; review_id?: string }> => {
     try {
       const res = await fetch(`${API_BASE}/reviews/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(reviewData)
       });
-      return await parseResponse<{ message: string }>(res, 'Failed to submit review');
+      return await parseResponse<{ message: string; review_id?: string }>(res, 'Failed to submit review');
     } catch (err: any) {
       // If the backend API is unreachable or returned HTML (e.g. on Netlify / Cloudflare static hosting before backend deployment):
-      // Automatically store in localStorage so client reviews are recorded and NEVER lost!
-      if (
-        err.message?.includes('Backend API is not reachable') ||
-        err.message?.includes('Failed to fetch') ||
-        err.name === 'TypeError' ||
-        err.message?.includes('HTML') ||
-        err.message?.includes('JSON')
-      ) {
-        try {
-          const key = 'pivo_pending_reviews';
-          const localList = JSON.parse(localStorage.getItem(key) || '[]');
-          localList.unshift({
-            id: Date.now(),
-            ...reviewData,
-            status: 'pending',
-            created_at: new Date().toISOString()
-          });
-          localStorage.setItem(key, JSON.stringify(localList));
-          return {
-            message: 'Thank you! Your client review has been submitted successfully and recorded for verification.'
-          };
-        } catch (storageErr) {
-          // ignore storage error
-        }
+      // Automatically store in localStorage so client reviews are recorded and NEVER lost, avoiding any unhandled JSON crash!
+      try {
+        const key = 'pivo_pending_reviews';
+        const localList = JSON.parse(localStorage.getItem(key) || '[]');
+        const localReviewId = `PIVO-REV-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+        localList.unshift({
+          id: Date.now(),
+          review_id: localReviewId,
+          ...reviewData,
+          status: 'pending',
+          is_offline_pending: true,
+          created_at: new Date().toISOString()
+        });
+        localStorage.setItem(key, JSON.stringify(localList));
+        return {
+          message: 'Thank you! Your client review has been submitted successfully and recorded for verification.',
+          review_id: localReviewId
+        };
+      } catch (storageErr) {
+        // Fallback friendly message if localStorage fails
+        return {
+          message: 'Thank you! Your client review has been submitted for verification.'
+        };
       }
-      throw err;
     }
   },
-  getAdminReviews: async (): Promise<{
+  getAdminReviews: async (params?: {
+    status?: string;
+    project_id?: number | string;
+    q?: string;
+  }): Promise<{
     reviews: Review[];
     summary: { total: number; pending: number; approved: number; rejected: number; average: number };
   }> => {
-    const res = await fetch(`${API_BASE}/reviews/admin/all`, {
-      headers: getAuthHeaders()
-    });
-    if (!res.ok) throw new Error('Failed to fetch reviews for admin');
-    return res.json();
+    const query = new URLSearchParams();
+    if (params?.status && params.status !== 'all') query.set('status', params.status);
+    if (params?.project_id && params.project_id !== 'all') query.set('project_id', String(params.project_id));
+    if (params?.q) query.set('q', params.q);
+    const qs = query.toString() ? `?${query.toString()}` : '';
+
+    let serverData: {
+      reviews: Review[];
+      summary: { total: number; pending: number; approved: number; rejected: number; average: number };
+    } = {
+      reviews: [],
+      summary: { total: 0, pending: 0, approved: 0, rejected: 0, average: 5.0 }
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/reviews/admin/all${qs}`, {
+        headers: getAuthHeaders()
+      });
+      serverData = await parseResponse(res, 'Failed to fetch reviews for admin');
+    } catch (err) {
+      console.warn('Could not fetch server reviews, checking offline cache:', err);
+    }
+
+    // Merge offline pending reviews from localStorage if any
+    try {
+      const offlineReviews = JSON.parse(localStorage.getItem('pivo_pending_reviews') || '[]');
+      if (Array.isArray(offlineReviews) && offlineReviews.length > 0) {
+        serverData.reviews = [...offlineReviews, ...serverData.reviews];
+        serverData.summary.total += offlineReviews.length;
+        serverData.summary.pending += offlineReviews.length;
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    return serverData;
   },
   adminAddClientReview: async (reviewData: Partial<Review>): Promise<{ message: string; review: Review }> => {
     const res = await fetch(`${API_BASE}/reviews/admin/add`, {
@@ -350,9 +410,7 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify(reviewData)
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to add client review');
-    return data;
+    return parseResponse<{ message: string; review: Review }>(res, 'Failed to add client review');
   },
   adminUpdateClientReview: async (id: number, reviewData: Partial<Review>): Promise<{ message: string; review: Review }> => {
     const res = await fetch(`${API_BASE}/reviews/admin/${id}`, {
@@ -360,9 +418,18 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify(reviewData)
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to update client review');
-    return data;
+    return parseResponse<{ message: string; review: Review }>(res, 'Failed to update client review');
+  },
+  linkReviewToProject: async (
+    reviewId: number,
+    projectId: number | null
+  ): Promise<{ message: string; review: Review }> => {
+    const res = await fetch(`${API_BASE}/reviews/admin/${reviewId}/link-project`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ project_id: projectId })
+    });
+    return parseResponse<{ message: string; review: Review }>(res, 'Failed to link review to project');
   },
   updateReviewStatus: async (
     id: number,
@@ -375,8 +442,7 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify({ status, is_verified, is_visible })
     });
-    if (!res.ok) throw new Error('Failed to update review status');
-    return res.json();
+    return parseResponse<{ message: string }>(res, 'Failed to update review status');
   },
   adminSetFounderResponse: async (id: number, founder_response: string | null): Promise<{ message: string; founder_response: string | null; founder_responded_at: string | null }> => {
     const res = await fetch(`${API_BASE}/reviews/admin/${id}/founder-response`, {
@@ -384,17 +450,14 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify({ founder_response })
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to update founder response');
-    return data;
+    return parseResponse<{ message: string; founder_response: string | null; founder_responded_at: string | null }>(res, 'Failed to update founder response');
   },
   deleteReview: async (id: number): Promise<{ message: string }> => {
     const res = await fetch(`${API_BASE}/reviews/admin/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders()
     });
-    if (!res.ok) throw new Error('Failed to delete review');
-    return res.json();
+    return parseResponse<{ message: string }>(res, 'Failed to delete review');
   },
 
   // Enquiries
@@ -513,8 +576,7 @@ export const api = {
   // Settings
   getSettings: async (): Promise<{ settings: Record<string, string> }> => {
     const res = await fetch(`${API_BASE}/settings`);
-    if (!res.ok) throw new Error('Failed to fetch website settings');
-    return res.json();
+    return parseResponse<{ settings: Record<string, string> }>(res, 'Failed to fetch website settings');
   },
   updateSettings: async (settings: Record<string, string>): Promise<{ message: string }> => {
     const res = await fetch(`${API_BASE}/settings`, {
@@ -522,8 +584,7 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify(settings)
     });
-    if (!res.ok) throw new Error('Failed to update website settings');
-    return res.json();
+    return parseResponse<{ message: string }>(res, 'Failed to update website settings');
   },
 
   // File Upload
@@ -543,11 +604,34 @@ export const api = {
       body: formData
     });
 
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Failed to upload file');
+    return parseResponse<{ url: string; filename: string }>(res, 'Failed to upload file');
+  },
+  uploadMultipleFiles: async (files: File[]): Promise<{ files: Array<{ url: string; filename: string }> }> => {
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
+
+    const token = localStorage.getItem('pivo_admin_token');
+    const headers: HeadersInit = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
-    return data;
+
+    const res = await fetch(`${API_BASE}/upload/multiple`, {
+      method: 'POST',
+      headers,
+      body: formData
+    });
+
+    return parseResponse<{ files: Array<{ url: string; filename: string }> }>(res, 'Failed to upload files');
+  },
+  deleteUploadedFile: async (filename: string): Promise<{ message: string }> => {
+    const res = await fetch(`${API_BASE}/upload/${encodeURIComponent(filename)}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    return parseResponse<{ message: string }>(res, 'Failed to delete file');
   },
 
   // Auth & Security

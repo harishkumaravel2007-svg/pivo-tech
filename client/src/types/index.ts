@@ -82,13 +82,19 @@ export interface Project {
   technologies: string[];
   image_url: string;
   screenshots: string[];
+  features?: string[];
+  client_name?: string;
   live_url?: string;
   github_url?: string;
   completion_date?: string;
   is_featured: number;
   is_demo_concept: number;
+  is_published?: number;
+  status?: 'published' | 'draft' | 'archived';
   sort_order: number;
   created_at?: string;
+  updated_at?: string;
+  related_reviews?: Review[];
 }
 
 export interface Achievement {
@@ -105,6 +111,10 @@ export interface Achievement {
 
 export interface Review {
   id: number;
+  review_id?: string;
+  project_id?: number | null;
+  linked_project_name?: string;
+  linked_project_slug?: string;
   reviewer_name: string;
   business_name?: string;
   business_logo_url?: string;

@@ -167,6 +167,8 @@ export function initDatabase() {
 
   // Ensure reviews table has all Client Showcase & Founder Response columns
   const reviewColumns = db.prepare("PRAGMA table_info(reviews)").all().map(c => c.name);
+  if (!reviewColumns.includes('review_id')) db.exec("ALTER TABLE reviews ADD COLUMN review_id TEXT");
+  if (!reviewColumns.includes('project_id')) db.exec("ALTER TABLE reviews ADD COLUMN project_id INTEGER");
   if (!reviewColumns.includes('business_logo_url')) db.exec("ALTER TABLE reviews ADD COLUMN business_logo_url TEXT");
   if (!reviewColumns.includes('location')) db.exec("ALTER TABLE reviews ADD COLUMN location TEXT");
   if (!reviewColumns.includes('project_name')) db.exec("ALTER TABLE reviews ADD COLUMN project_name TEXT");
@@ -177,6 +179,14 @@ export function initDatabase() {
   if (!reviewColumns.includes('founder_responded_at')) db.exec("ALTER TABLE reviews ADD COLUMN founder_responded_at TEXT");
   if (!reviewColumns.includes('approved_at')) db.exec("ALTER TABLE reviews ADD COLUMN approved_at TEXT");
   if (!reviewColumns.includes('created_by')) db.exec("ALTER TABLE reviews ADD COLUMN created_by TEXT DEFAULT 'client'");
+
+  // Ensure projects table has all Portfolio Management columns
+  const projectColumns = db.prepare("PRAGMA table_info(projects)").all().map(c => c.name);
+  if (!projectColumns.includes('client_name')) db.exec("ALTER TABLE projects ADD COLUMN client_name TEXT");
+  if (!projectColumns.includes('features_json')) db.exec("ALTER TABLE projects ADD COLUMN features_json TEXT DEFAULT '[]'");
+  if (!projectColumns.includes('status')) db.exec("ALTER TABLE projects ADD COLUMN status TEXT DEFAULT 'published'");
+  if (!projectColumns.includes('is_published')) db.exec("ALTER TABLE projects ADD COLUMN is_published INTEGER DEFAULT 1");
+  if (!projectColumns.includes('updated_at')) db.exec("ALTER TABLE projects ADD COLUMN updated_at TEXT");
 
   // Ensure founder_info has tagline & instagram columns
   const founderColumns = db.prepare("PRAGMA table_info(founder_info)").all().map(c => c.name);
@@ -191,11 +201,25 @@ export function initDatabase() {
   if (!enquiryColumns.includes('preferred_contact')) db.exec("ALTER TABLE enquiries ADD COLUMN preferred_contact TEXT DEFAULT 'whatsapp'");
   if (!enquiryColumns.includes('updated_at')) db.exec("ALTER TABLE enquiries ADD COLUMN updated_at TEXT");
 
-  // Performance and query indexes
+  // Performance, relationship, and query indexes
   db.exec(`
     CREATE INDEX IF NOT EXISTS idx_reviews_status ON reviews(status);
+    CREATE INDEX IF NOT EXISTS idx_reviews_project_id ON reviews(project_id);
+    CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status);
+    CREATE INDEX IF NOT EXISTS idx_projects_is_published ON projects(is_published);
     CREATE INDEX IF NOT EXISTS idx_enquiries_status ON enquiries(status);
     CREATE INDEX IF NOT EXISTS idx_projects_category ON projects(category);
+  `);
+
+  // Backfill existing reviews & projects relationships
+  db.exec(`
+    UPDATE reviews SET review_id = 'PIVO-REV-' || id WHERE review_id IS NULL;
+    UPDATE projects SET status = 'published' WHERE status IS NULL;
+    UPDATE projects SET is_published = 1 WHERE is_published IS NULL;
+    UPDATE projects SET updated_at = created_at WHERE updated_at IS NULL;
+    UPDATE projects SET client_name = 'Sri Balaji Stationery' WHERE slug = 'sri-balaji-stationery' AND (client_name IS NULL OR client_name = '');
+    UPDATE projects SET features_json = '["Digital Retail Catalogue","Direct WhatsApp Orders","Store Navigation & Map","Mobile-Optimized Fast UI"]' WHERE slug = 'sri-balaji-stationery' AND (features_json IS NULL OR features_json = '[]');
+    UPDATE reviews SET project_id = (SELECT id FROM projects WHERE slug = 'sri-balaji-stationery' LIMIT 1) WHERE (business_name LIKE '%Sri Balaji%' OR reviewer_name LIKE '%Balaji%') AND project_id IS NULL;
   `);
 
   // Admin users table exists. No default or hardcoded credentials are seeded.
