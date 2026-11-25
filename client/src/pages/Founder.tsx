@@ -15,7 +15,7 @@ import {
   ArrowRight,
   Send
 } from 'lucide-react';
-import { api } from '../services/api';
+import { api, getAssetUrl } from '../services/api';
 import { FounderInfo, Skill } from '../types';
 
 export const Founder: React.FC = () => {
@@ -75,7 +75,7 @@ export const Founder: React.FC = () => {
               {/* Founder Photo */}
               <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-[#101B33] mb-6 border-2 border-[#C6A15B]/50 shadow-md">
                 <img
-                  src={founder?.photo_url || '/assets/harish-founder.jpg'}
+                  src={getAssetUrl(founder?.photo_url) || '/assets/harish-founder.jpg'}
                   alt={`${founder?.name || 'Harish K'} - Founder & CEO of PIVO TECH`}
                   className="w-full h-full object-cover object-top"
                 />

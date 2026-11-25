@@ -10,7 +10,7 @@ import {
   CheckCircle2,
   FolderGit2
 } from 'lucide-react';
-import { api } from '../services/api';
+import { api, getAssetUrl } from '../services/api';
 import { Project } from '../types';
 import { Modal } from '../components/Modal';
 import { EmptyState } from '../components/EmptyState';
@@ -103,7 +103,7 @@ export const Portfolio: React.FC = () => {
                 {/* Project Image Banner */}
                 <div className="relative aspect-video bg-[#101B33] overflow-hidden">
                   <img
-                    src={project.image_url}
+                    src={getAssetUrl(project.image_url)}
                     alt={project.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -216,7 +216,7 @@ export const Portfolio: React.FC = () => {
           <div className="space-y-6">
             <div className="aspect-video w-full rounded-xl overflow-hidden bg-[#101B33]">
               <img
-                src={selectedProject.image_url}
+                src={getAssetUrl(selectedProject.image_url)}
                 alt={selectedProject.name}
                 className="w-full h-full object-cover"
               />

@@ -17,7 +17,7 @@ import {
   Sparkles,
   Send
 } from 'lucide-react';
-import { api } from '../../services/api';
+import { api, getAssetUrl } from '../../services/api';
 import { FounderInfo } from '../../types';
 
 export const FounderTab: React.FC = () => {
@@ -166,7 +166,7 @@ export const FounderTab: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               <div className="w-28 h-28 rounded-2xl overflow-hidden bg-[#101B33] border-2 border-[#C6A15B] shrink-0 shadow-md">
                 <img
-                  src={form.photo_url || '/assets/harish-founder.jpg'}
+                  src={getAssetUrl(form.photo_url) || '/assets/harish-founder.jpg'}
                   alt="Founder Preview"
                   className="w-full h-full object-cover object-top"
                 />
@@ -216,7 +216,7 @@ export const FounderTab: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-center gap-6 p-6 rounded-2xl bg-slate-50 border border-slate-200">
           <div className="w-28 h-28 rounded-2xl overflow-hidden bg-[#101B33] border-2 border-[#C6A15B] shrink-0 shadow-md">
             <img
-              src={form.photo_url || '/assets/harish-founder.jpg'}
+              src={getAssetUrl(form.photo_url) || '/assets/harish-founder.jpg'}
               alt="Founder"
               className="w-full h-full object-cover object-top"
             />

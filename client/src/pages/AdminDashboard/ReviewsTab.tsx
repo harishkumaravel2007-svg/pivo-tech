@@ -21,7 +21,7 @@ import {
   CornerDownRight,
   UserCheck
 } from 'lucide-react';
-import { api } from '../../services/api';
+import { api, getAssetUrl } from '../../services/api';
 import { Review } from '../../types';
 import { RatingStars } from '../../components/RatingStars';
 
@@ -340,7 +340,7 @@ export const ReviewsTab: React.FC = () => {
                   {/* Logo or Initial */}
                   {rev.business_logo_url ? (
                     <img
-                      src={rev.business_logo_url}
+                      src={getAssetUrl(rev.business_logo_url)}
                       alt={rev.business_name || rev.reviewer_name}
                       className="w-12 h-12 rounded-xl object-contain bg-slate-50 border border-slate-200 p-1 shrink-0"
                     />
@@ -600,7 +600,7 @@ export const ReviewsTab: React.FC = () => {
                 <div className="flex items-center gap-3">
                   {formData.business_logo_url && (
                     <img
-                      src={formData.business_logo_url}
+                      src={getAssetUrl(formData.business_logo_url)}
                       alt="Logo preview"
                       className="w-12 h-12 rounded-xl object-contain bg-slate-50 border border-slate-200 p-1"
                     />
@@ -830,7 +830,7 @@ export const ReviewsTab: React.FC = () => {
                 <div className="flex items-center gap-3">
                   {formData.business_logo_url && (
                     <img
-                      src={formData.business_logo_url}
+                      src={getAssetUrl(formData.business_logo_url)}
                       alt="Logo preview"
                       className="w-12 h-12 rounded-xl object-contain bg-slate-50 border border-slate-200 p-1"
                     />

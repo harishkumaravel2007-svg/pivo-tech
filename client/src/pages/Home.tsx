@@ -14,7 +14,7 @@ import {
   Layers,
   Award
 } from 'lucide-react';
-import { api } from '../services/api';
+import { api, getAssetUrl } from '../services/api';
 import { Service, Project, Review, ReviewStats, FounderInfo } from '../types';
 import { RatingStars } from '../components/RatingStars';
 import { Logo } from '../components/Logo';
@@ -205,7 +205,7 @@ export const Home: React.FC = () => {
             <div className="lg:col-span-5 flex justify-center">
               <div className="relative w-72 sm:w-80 aspect-square rounded-3xl overflow-hidden border-2 border-[#C6A15B]/40 shadow-premium bg-[#101B33]">
                 <img
-                  src={founder?.photo_url || '/assets/harish-founder.jpg'}
+                  src={getAssetUrl(founder?.photo_url) || '/assets/harish-founder.jpg'}
                   alt="Harish K - Founder & CEO of PIVO TECH"
                   className="w-full h-full object-cover object-top"
                 />
@@ -302,7 +302,7 @@ export const Home: React.FC = () => {
             >
               <div className="relative aspect-video bg-[#101B33] overflow-hidden group">
                 <img
-                  src={project.image_url}
+                  src={getAssetUrl(project.image_url)}
                   alt={project.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />

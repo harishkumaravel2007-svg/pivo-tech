@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2, CheckCircle, AlertCircle, Upload, ExternalLink, Github, FolderGit2 } from 'lucide-react';
-import { api } from '../../services/api';
+import { api, getAssetUrl } from '../../services/api';
 import { Project } from '../../types';
 import { Modal } from '../../components/Modal';
 
@@ -165,7 +165,7 @@ export const ProjectsTab: React.FC = () => {
               <tr key={p.id} className="hover:bg-slate-50 transition-colors">
                 <td className="py-3 px-4">
                   <div className="w-14 h-9 rounded-lg overflow-hidden bg-[#101B33] border border-slate-200">
-                    <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" />
+                    <img src={getAssetUrl(p.image_url)} alt={p.name} className="w-full h-full object-cover" />
                   </div>
                 </td>
                 <td className="py-3 px-4">

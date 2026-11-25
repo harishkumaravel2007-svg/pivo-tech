@@ -14,7 +14,7 @@ import {
   CornerDownRight,
   Sparkles
 } from 'lucide-react';
-import { api } from '../services/api';
+import { api, getAssetUrl } from '../services/api';
 import { Review, ReviewStats } from '../types';
 import { RatingStars } from '../components/RatingStars';
 
@@ -239,7 +239,7 @@ export const Reviews: React.FC = () => {
                           {/* Business Logo or Initial Avatar */}
                           {rev.business_logo_url ? (
                             <img
-                              src={rev.business_logo_url}
+                              src={getAssetUrl(rev.business_logo_url)}
                               alt={rev.business_name || rev.reviewer_name}
                               className="w-14 h-14 rounded-xl object-contain bg-slate-50 border border-slate-200 p-1.5 shrink-0"
                             />

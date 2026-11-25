@@ -11,7 +11,19 @@ import {
   AdminUser
 } from '../types';
 
-const API_BASE = '/api';
+const BACKEND_BASE = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') || '';
+const API_BASE = `${BACKEND_BASE}/api`;
+
+export function getAssetUrl(path?: string): string {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+    return path;
+  }
+  if (path.startsWith('/uploads')) {
+    return BACKEND_BASE ? `${BACKEND_BASE}${path}` : path;
+  }
+  return path;
+}
 
 function getAuthHeaders(): HeadersInit {
   const token = localStorage.getItem('pivo_admin_token');
