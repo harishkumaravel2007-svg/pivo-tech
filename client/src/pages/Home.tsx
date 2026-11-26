@@ -206,7 +206,7 @@ export const Home: React.FC = () => {
               <div className="relative w-72 sm:w-80 aspect-square rounded-3xl overflow-hidden border-2 border-[#C6A15B]/40 shadow-premium bg-[#101B33]">
                 <img
                   src={getAssetUrl(founder?.photo_url) || '/assets/harish-founder.jpg'}
-                  alt="Harish K - Founder & CEO of PIVO TECH"
+                  alt="Harish K - Founder & Managing Director of PIVO TECH"
                   className="w-full h-full object-cover object-top"
                 />
               </div>
@@ -224,12 +224,12 @@ export const Home: React.FC = () => {
               </h2>
 
               <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
-                "{founder?.bio || "Hello, I'm Harish K, Founder & CEO of PIVO TECH. I focus on building modern websites, digital growth solutions, AI-powered agents and business automation systems. My goal is to help businesses establish a strong digital presence, improve productivity and grow through practical technology solutions."}"
+                "{founder?.bio || "Hello, I'm Harish K, Founder & Managing Director of PIVO TECH. I focus on building modern websites, digital growth solutions, AI-powered agents and business automation systems. My goal is to help businesses establish a strong digital presence, improve productivity and grow through practical technology solutions."}"
               </p>
 
               <div className="grid grid-cols-2 gap-4 py-3 border-y border-slate-100">
                 <div>
-                  <span className="block text-xs uppercase tracking-wider text-slate-400 font-medium">Founder &amp; CEO</span>
+                  <span className="block text-xs uppercase tracking-wider text-slate-400 font-medium">Founder &amp; Managing Director</span>
                   <span className="text-base font-bold text-[#101B33]">Harish K</span>
                   <span className="block text-xs text-[#C6A15B] font-semibold">{founder?.tagline || 'Build. Grow. Automate.'}</span>
                 </div>
@@ -245,7 +245,7 @@ export const Home: React.FC = () => {
                   to="/founder"
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-[#101B33] text-white hover:bg-[#1C2C4E] transition-colors"
                 >
-                  <span>View Founder Profile</span>
+                  <span>Meet the Founder</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <a
@@ -257,7 +257,7 @@ export const Home: React.FC = () => {
                   <span>Contact Founder (WhatsApp)</span>
                 </a>
                 <a
-                  href={founder?.linkedin || "https://www.linkedin.com/in/harish-k-303480301/"}
+                  href={founder?.linkedin || "https://www.linkedin.com/in/harish-k-303480401/"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors border border-slate-200"

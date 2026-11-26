@@ -634,7 +634,7 @@ export const Services: React.FC = () => {
             },
             {
               q: 'What kind of support and warranty is provided after launch?',
-              a: 'Every completed solution includes a comprehensive post-deployment warranty covering bug fixes, performance tuning, and security updates, with direct architectural oversight from Founder & CEO Harish K.'
+              a: 'Every completed solution includes a comprehensive post-deployment warranty covering bug fixes, performance tuning, and security updates, with direct architectural oversight from Founder & Managing Director Harish K.'
             }
           ].map((faq, idx) => (
             <div

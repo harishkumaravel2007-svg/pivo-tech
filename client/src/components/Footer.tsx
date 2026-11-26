@@ -56,7 +56,7 @@ export const Footer: React.FC = () => {
             
             <div className="pt-2 flex items-center gap-3">
               <a
-                href="https://www.linkedin.com/in/harish-k-303480301/"
+                href="https://www.linkedin.com/in/harish-k-303480401/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-lg bg-[#182644] border border-slate-700/60 flex items-center justify-center text-slate-300 hover:text-[#C6A15B] hover:border-[#C6A15B]/50 transition-colors"

@@ -208,7 +208,7 @@ export const Contact: React.FC = () => {
                 <span>Follow Our Work</span>
                 <div className="flex items-center gap-3">
                   <a
-                    href="https://www.linkedin.com/in/harish-k-303480301/"
+                    href="https://www.linkedin.com/in/harish-k-303480401/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1 text-slate-700 hover:text-[#C6A15B] transition-colors font-medium"

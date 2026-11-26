@@ -7,7 +7,7 @@
 
 ## 1. Brand Identity Overview
 - **Business Name:** PIVO TECH
-- **Founder & CEO:** Harish K
+- **Founder & Managing Director:** Harish K
 - **Tagline:** Build. Grow. Automate.
 - **Business Type:** Digital Technology & IT Solutions Agency
 - **Headquarters:** Theni, Tamil Nadu, India
@@ -15,7 +15,7 @@
 - **Official Email:** [harishkumaravel2007@gmail.com](mailto:harishkumaravel2007@gmail.com)
 - **Official Phone / WhatsApp:** [+91 99442 45043](https://wa.me/919944245043)
 - **Instagram:** [https://www.instagram.com/_pivo.tech/](https://www.instagram.com/_pivo.tech/)
-- **LinkedIn:** [https://www.linkedin.com/in/harish-k-303480301/](https://www.linkedin.com/in/harish-k-303480301/)
+- **LinkedIn:** [https://www.linkedin.com/in/harish-k-303480401/](https://www.linkedin.com/in/harish-k-303480401/)
 
 ### Color Palette
 - **Primary Deep Navy:** `#101B33` (with deep background tones `#0C1426` / `#152342`)

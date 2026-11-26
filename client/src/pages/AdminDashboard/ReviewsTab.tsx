@@ -28,6 +28,7 @@ import {
 import { api, getAssetUrl } from '../../services/api';
 import { Review, Project } from '../../types';
 import { RatingStars } from '../../components/RatingStars';
+import { normalizeExternalUrl } from '../../utils/url';
 
 export const ReviewsTab: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -507,21 +508,25 @@ export const ReviewsTab: React.FC = () => {
                 </div>
 
                 {/* External Client Website */}
-                {rev.website_url && (
-                  <div className="flex items-center gap-2 text-xs">
-                    <Globe className="w-3.5 h-3.5 text-[#C6A15B]" />
-                    <span className="text-slate-500 font-medium">Website:</span>
-                    <a
-                      href={rev.website_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[#101B33] hover:underline font-semibold inline-flex items-center gap-1"
-                    >
-                      <span>{rev.website_url}</span>
-                      <ExternalLink className="w-3 h-3 text-slate-400" />
-                    </a>
-                  </div>
-                )}
+                {(() => {
+                  const safeUrl = normalizeExternalUrl(rev.website_url);
+                  if (!safeUrl) return null;
+                  return (
+                    <div className="flex items-center gap-2 text-xs">
+                      <Globe className="w-3.5 h-3.5 text-[#C6A15B]" />
+                      <span className="text-slate-500 font-medium">Website:</span>
+                      <a
+                        href={safeUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#101B33] hover:underline font-semibold inline-flex items-center gap-1"
+                      >
+                        <span>{safeUrl}</span>
+                        <ExternalLink className="w-3 h-3 text-slate-400" />
+                      </a>
+                    </div>
+                  );
+                })()}
 
                 {/* Founder Response Display */}
                 {rev.founder_response && (

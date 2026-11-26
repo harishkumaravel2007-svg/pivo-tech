@@ -23,15 +23,15 @@ import { FounderInfo } from '../../types';
 export const FounderTab: React.FC = () => {
   const [form, setForm] = useState<Partial<FounderInfo>>({
     name: 'Harish K',
-    designation: 'Founder & CEO',
+    designation: 'Founder & Managing Director',
     company: 'PIVO TECH',
     tagline: 'Build. Grow. Automate.',
     location: 'Theni, Tamil Nadu, India',
     email: 'harishkumaravel2007@gmail.com',
     phone: '+91 99442 45043',
-    linkedin: 'https://www.linkedin.com/in/harish-k-303480301/',
+    linkedin: 'https://www.linkedin.com/in/harish-k-303480401/',
     instagram: 'https://www.instagram.com/_pivo.tech/',
-    bio: "Hello, I'm Harish K, Founder & CEO of PIVO TECH. I focus on building modern websites, digital growth solutions, AI-powered agents and business automation systems. My goal is to help businesses establish a strong digital presence, improve productivity and grow through practical technology solutions.",
+    bio: "Hello, I'm Harish K, Founder & Managing Director of PIVO TECH. I focus on building modern websites, digital growth solutions, AI-powered agents and business automation systems. My goal is to help businesses establish a strong digital presence, improve productivity and grow through practical technology solutions.",
     vision: 'To build a world-class technology firm rooted in integrity, delivering tangible digital leverage to startups, enterprises, and local businesses alike.',
     photo_url: '/assets/harish-founder.jpg'
   });
@@ -175,7 +175,7 @@ export const FounderTab: React.FC = () => {
               <div className="flex-1 text-center sm:text-left space-y-1">
                 <h3 className="text-xl font-extrabold text-[#101B33]">{form.name || 'Harish K'}</h3>
                 <p className="text-xs font-bold text-[#C6A15B] uppercase tracking-wider">
-                  {form.designation || 'Founder & CEO'} &bull; {form.company || 'PIVO TECH'}
+                  {form.designation || 'Founder & Managing Director'} &bull; {form.company || 'PIVO TECH'}
                 </p>
                 <p className="text-xs text-slate-500 font-medium italic">
                   "{form.tagline || 'Build. Grow. Automate.'}"
@@ -337,7 +337,7 @@ export const FounderTab: React.FC = () => {
               name="linkedin"
               value={form.linkedin || ''}
               onChange={handleChange}
-              placeholder="https://www.linkedin.com/in/harish-k-303480301/"
+              placeholder="https://www.linkedin.com/in/harish-k-303480401/"
               className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
             />
           </div>
@@ -397,7 +397,7 @@ export const FounderTab: React.FC = () => {
             required
             value={form.bio || ''}
             onChange={handleChange}
-            placeholder="Hello, I'm Harish K, Founder & CEO of PIVO TECH. I focus on building modern websites, digital growth solutions, AI-powered agents and business automation systems..."
+            placeholder="Hello, I'm Harish K, Founder & Managing Director of PIVO TECH. I focus on building modern websites, digital growth solutions, AI-powered agents and business automation systems..."
             className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
           />
         </div>

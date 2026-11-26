@@ -106,7 +106,7 @@ export const About: React.FC = () => {
                   <span className="font-medium text-[#C6A15B]">Build. Grow. Automate.</span>
                 </div>
                 <div>
-                  <span className="block text-xs uppercase text-slate-400 font-semibold">Founder &amp; CEO</span>
+                  <span className="block text-xs uppercase text-slate-400 font-semibold">Founder &amp; Managing Director</span>
                   <span className="font-semibold text-slate-800">Harish K</span>
                 </div>
                 <div>

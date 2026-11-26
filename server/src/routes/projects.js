@@ -4,6 +4,39 @@ import { requireAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
+// Helper to normalize and validate external project live URLs
+function normalizeLiveUrl(rawUrl) {
+  if (!rawUrl || typeof rawUrl !== 'string') return null;
+  const trimmed = rawUrl.trim();
+  if (!trimmed || trimmed === '#' || trimmed === '/') return null;
+
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith('javascript:') || lower.startsWith('data:') || lower.startsWith('vbscript:') || lower.startsWith('file:')) {
+    return null;
+  }
+  // Prevent self-referential loops to pivotech domain or internal paths
+  if (lower.includes('pivotech.in/portfolio') || lower.includes('pivotech07.netlify.app/portfolio') || lower.startsWith('/portfolio') || lower.startsWith('portfolio/')) {
+    return null;
+  }
+
+  let target = trimmed;
+  if (!/^https?:\/\//i.test(target)) {
+    target = `https://${target}`;
+  }
+
+  try {
+    const parsed = new URL(target);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
+    const hostname = parsed.hostname.toLowerCase();
+    if (!hostname || !hostname.includes('.') || hostname.endsWith('.')) return null;
+    if (hostname.includes('http:') || hostname.includes('https:') || hostname.includes('//')) return null;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') return null;
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
+
 // Helper to parse project JSON fields and attach related reviews
 function formatProject(p, includeReviews = true) {
   let technologies = [];
@@ -217,7 +250,7 @@ router.post('/', requireAdmin, (req, res) => {
       featuresJson,
       image_url || '/assets/projects/nexus-portal.svg',
       screenshotsJson,
-      live_url ? live_url.trim() : null,
+      normalizeLiveUrl(live_url),
       github_url ? github_url.trim() : null,
       completion_date || '',
       is_featured ? 1 : 0,
@@ -333,7 +366,7 @@ router.put('/:id', requireAdmin, (req, res) => {
       featuresJson,
       image_url || null,
       screenshotsJson,
-      live_url !== undefined ? (live_url ? live_url.trim() : null) : existing.live_url,
+      live_url !== undefined ? normalizeLiveUrl(live_url) : existing.live_url,
       github_url !== undefined ? (github_url ? github_url.trim() : null) : existing.github_url,
       completion_date !== undefined ? completion_date : null,
       is_featured !== undefined ? (is_featured ? 1 : 0) : null,

@@ -32,7 +32,7 @@ export const Founder: React.FC = () => {
     });
   }, []);
 
-  const linkedinUrl = founder?.linkedin || 'https://www.linkedin.com/in/harish-k-303480301/';
+  const linkedinUrl = founder?.linkedin || 'https://www.linkedin.com/in/harish-k-303480401/';
   const instagramUrl = founder?.instagram || 'https://www.instagram.com/_pivo.tech/';
   const emailAddress = founder?.email || 'harishkumaravel2007@gmail.com';
   const phoneNumber = founder?.phone || '+91 99442 45043';
@@ -46,17 +46,17 @@ export const Founder: React.FC = () => {
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white/10 text-xs font-semibold text-[#E5C378] mb-4">
               <ShieldCheck className="w-3.5 h-3.5 text-[#C6A15B]" />
-              <span>Executive Leadership &bull; PIVO TECH</span>
+              <span>Leadership &bull; PIVO TECH</span>
             </div>
             <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
-              {founder?.name || 'Harish K'}
+              Meet the Founder
             </h1>
-            <p className="text-xl text-[#C6A15B] font-semibold mt-1">
-              {founder?.designation || 'Founder & CEO'}, {founder?.company || 'PIVO TECH'}
+            <p className="text-xl text-[#C6A15B] font-semibold mt-2">
+              {founder?.name || 'Harish K'} &bull; {founder?.designation || 'Founder & Managing Director'}
             </p>
             <p className="text-slate-300 text-sm sm:text-base mt-2 flex items-center gap-2">
               <span className="font-semibold text-white tracking-wide">
-                {founder?.tagline || 'Build. Grow. Automate.'}
+                {founder?.company || 'PIVO TECH'} &mdash; {founder?.tagline || 'Build. Grow. Automate.'}
               </span>
               <span className="text-slate-400">&bull;</span>
               <MapPin className="w-4 h-4 text-[#C6A15B] inline" />
@@ -76,7 +76,7 @@ export const Founder: React.FC = () => {
               <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-[#101B33] mb-6 border-2 border-[#C6A15B]/50 shadow-md">
                 <img
                   src={getAssetUrl(founder?.photo_url) || '/assets/harish-founder.jpg'}
-                  alt={`${founder?.name || 'Harish K'} - Founder & CEO of PIVO TECH`}
+                  alt={`${founder?.name || 'Harish K'} - Founder & Managing Director of PIVO TECH`}
                   className="w-full h-full object-cover object-top"
                 />
               </div>
@@ -87,7 +87,7 @@ export const Founder: React.FC = () => {
                   {founder?.name || 'Harish K'}
                 </h2>
                 <p className="text-xs font-bold text-[#C6A15B] uppercase tracking-wider mt-1">
-                  {founder?.designation || 'Founder & CEO'} &bull; {founder?.company || 'PIVO TECH'}
+                  {founder?.designation || 'Founder & Managing Director'} &bull; {founder?.company || 'PIVO TECH'}
                 </p>
                 <p className="text-xs font-semibold text-slate-500 mt-1 italic">
                   "{founder?.tagline || 'Build. Grow. Automate.'}"
@@ -177,7 +177,7 @@ export const Founder: React.FC = () => {
 
               <div className="text-slate-700 leading-relaxed text-sm sm:text-base space-y-4 pt-2">
                 <p className="font-medium text-[#101B33] bg-[#F7F8FA] p-4 rounded-2xl border-l-4 border-[#C6A15B]">
-                  "{founder?.bio || "Hello, I'm Harish K, Founder & CEO of PIVO TECH. I focus on building modern websites, digital growth solutions, AI-powered agents and business automation systems. My goal is to help businesses establish a strong digital presence, improve productivity and grow through practical technology solutions."}"
+                  "{founder?.bio || "Hello, I'm Harish K, Founder & Managing Director of PIVO TECH. I focus on building modern websites, digital growth solutions, AI-powered agents and business automation systems. My goal is to help businesses establish a strong digital presence, improve productivity and grow through practical technology solutions."}"
                 </p>
                 <p>
                   As an engineer and agency founder, I prioritize deep technical understanding over surface-level hype. When engineering digital systems for our clients, my core focus is always long-term stability, lightning-fast performance, and measurable operational leverage.

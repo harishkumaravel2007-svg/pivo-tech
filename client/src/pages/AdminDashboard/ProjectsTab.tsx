@@ -18,11 +18,15 @@ import {
   CheckCircle2,
   X,
   Building2,
-  Calendar
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Globe
 } from 'lucide-react';
 import { api, getAssetUrl } from '../../services/api';
 import { Project } from '../../types';
 import { Modal } from '../../components/Modal';
+import { normalizeExternalUrl } from '../../utils/url';
 
 export const ProjectsTab: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -201,6 +205,19 @@ export const ProjectsTab: React.FC = () => {
       const current = [...(prev.screenshots || [])];
       current.splice(index, 1);
       return { ...prev, screenshots: current };
+    });
+  };
+
+  const moveScreenshot = (index: number, direction: 'left' | 'right') => {
+    setEditingProject(prev => {
+      if (!prev || !prev.screenshots) return prev;
+      const targetIndex = direction === 'left' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= prev.screenshots.length) return prev;
+      const copy = [...prev.screenshots];
+      const temp = copy[index];
+      copy[index] = copy[targetIndex];
+      copy[targetIndex] = temp;
+      return { ...prev, screenshots: copy };
     });
   };
 
@@ -692,7 +709,17 @@ export const ProjectsTab: React.FC = () => {
                   {editingProject.screenshots.map((shot, sIdx) => (
                     <div key={sIdx} className="relative aspect-video rounded-lg overflow-hidden border border-slate-300 group bg-white">
                       <img src={getAssetUrl(shot)} alt={`Screenshot ${sIdx + 1}`} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 p-1">
+                        {sIdx > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => moveScreenshot(sIdx, 'left')}
+                            className="p-1 bg-white/80 text-[#101B33] rounded hover:bg-white"
+                            title="Move Earlier in Gallery"
+                          >
+                            <ChevronLeft className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => setAsCover(shot)}
@@ -709,6 +736,16 @@ export const ProjectsTab: React.FC = () => {
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
+                        {editingProject.screenshots && sIdx < editingProject.screenshots.length - 1 && (
+                          <button
+                            type="button"
+                            onClick={() => moveScreenshot(sIdx, 'right')}
+                            className="p-1 bg-white/80 text-[#101B33] rounded hover:bg-white"
+                            title="Move Later in Gallery"
+                          >
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -826,6 +863,26 @@ export const ProjectsTab: React.FC = () => {
                 ))}
               </div>
             )}
+
+            {(() => {
+              const validUrl = normalizeExternalUrl(previewProject.live_url);
+              if (!validUrl) return null;
+              return (
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                  <span className="text-slate-500 font-medium">Live Website Link:</span>
+                  <a
+                    href={validUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#101B33] text-white hover:bg-[#1A2846] transition-colors shadow-sm"
+                  >
+                    <Globe className="w-3.5 h-3.5 text-[#C6A15B]" />
+                    <span>Visit Live Website</span>
+                    <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+                  </a>
+                </div>
+              );
+            })()}
           </div>
         </Modal>
       )}

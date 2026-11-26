@@ -13,13 +13,15 @@ import {
   UserCheck,
   Building2,
   Sparkles,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Globe
 } from 'lucide-react';
 import { api, getAssetUrl } from '../services/api';
 import { Project } from '../types';
 import { Modal } from '../components/Modal';
 import { EmptyState } from '../components/EmptyState';
 import { RatingStars } from '../components/RatingStars';
+import { normalizeExternalUrl } from '../utils/url';
 
 export const Portfolio: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -179,36 +181,46 @@ export const Portfolio: React.FC = () => {
                   </div>
 
                   <div>
-                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
                       <button
+                        type="button"
                         onClick={() => openProjectModal(project)}
-                        className="inline-flex items-center gap-1.5 text-xs font-bold text-[#101B33] hover:text-[#C6A15B] transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-[#101B33] bg-slate-100 hover:bg-slate-200 transition-colors"
                       >
-                        <span>View Details</span>
+                        <span>View Project</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
 
                       <div className="flex items-center gap-2">
+                        {(() => {
+                          const validLiveUrl = normalizeExternalUrl(project.live_url);
+                          if (!validLiveUrl) return null;
+                          return (
+                            <a
+                              href={validLiveUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#101B33] text-white hover:bg-[#1A2846] transition-colors shadow-sm"
+                              title={`Visit live website: ${validLiveUrl}`}
+                            >
+                              <Globe className="w-3.5 h-3.5 text-[#C6A15B]" />
+                              <span>Visit Website</span>
+                              <ExternalLink className="w-3 h-3 opacity-80" />
+                            </a>
+                          );
+                        })()}
+
                         {project.github_url && (
                           <a
                             href={project.github_url}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
                             className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
                             title="View Source on GitHub"
                           >
                             <Github className="w-4 h-4" />
-                          </a>
-                        )}
-                        {project.live_url && (
-                          <a
-                            href={project.live_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-[#C6A15B] hover:bg-slate-100 transition-colors"
-                            title="Live Preview"
-                          >
-                            <ExternalLink className="w-4 h-4" />
                           </a>
                         )}
                       </div>
@@ -445,17 +457,22 @@ export const Portfolio: React.FC = () => {
             {/* Footer actions */}
             <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
               <div className="flex flex-wrap items-center gap-3">
-                {selectedProject.live_url && (
-                  <a
-                    href={selectedProject.live_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[#C6A15B] text-[#101B33] hover:bg-[#D4AF37] transition-colors"
-                  >
-                    <span>Visit Live Website</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                )}
+                {(() => {
+                  const validLiveUrl = normalizeExternalUrl(selectedProject.live_url);
+                  if (!validLiveUrl) return null;
+                  return (
+                    <a
+                      href={validLiveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[#C6A15B] text-[#101B33] hover:bg-[#D4AF37] transition-colors shadow-sm"
+                    >
+                      <Globe className="w-3.5 h-3.5" />
+                      <span>Visit Live Website</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  );
+                })()}
                 <a
                   href={`https://wa.me/919944245043?text=${encodeURIComponent(
                     `Hi Harish, I would like to discuss a project similar to ${selectedProject.name} (${selectedProject.category}) for my company.`

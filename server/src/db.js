@@ -220,6 +220,12 @@ export function initDatabase() {
     UPDATE projects SET client_name = 'Sri Balaji Stationery' WHERE slug = 'sri-balaji-stationery' AND (client_name IS NULL OR client_name = '');
     UPDATE projects SET features_json = '["Digital Retail Catalogue","Direct WhatsApp Orders","Store Navigation & Map","Mobile-Optimized Fast UI"]' WHERE slug = 'sri-balaji-stationery' AND (features_json IS NULL OR features_json = '[]');
     UPDATE reviews SET project_id = (SELECT id FROM projects WHERE slug = 'sri-balaji-stationery' LIMIT 1) WHERE (business_name LIKE '%Sri Balaji%' OR reviewer_name LIKE '%Balaji%') AND project_id IS NULL;
+    UPDATE projects SET live_url = NULL WHERE is_demo_concept = 1 AND (live_url LIKE '%pivotech.in%' OR live_url = '');
+    UPDATE projects SET live_url = 'https://sri-balaji-stationery.com' WHERE slug = 'sri-balaji-stationery';
+    UPDATE projects SET category = 'E-commerce Websites' WHERE category = 'E-commerce';
+    UPDATE founder_info SET designation = 'Founder & Managing Director', linkedin = 'https://www.linkedin.com/in/harish-k-303480401/' WHERE designation = 'Founder & CEO' OR linkedin LIKE '%303480301%' OR designation LIKE '%CEO%';
+    UPDATE company_info SET linkedin = 'https://www.linkedin.com/in/harish-k-303480401/' WHERE linkedin LIKE '%303480301%';
+    UPDATE settings SET value = 'https://www.linkedin.com/in/harish-k-303480401/' WHERE key = 'linkedin_url';
   `);
 
   // Admin users table exists. No default or hardcoded credentials are seeded.
@@ -255,7 +261,7 @@ export function initDatabase() {
       '+91 99442 45043',
       'https://pivotech.in',
       'https://www.instagram.com/_pivo.tech/',
-      'https://www.linkedin.com/in/harish-k-303480301/',
+      'https://www.linkedin.com/in/harish-k-303480401/',
       'PIVO TECH is a technology-focused digital solutions business founded by Harish K in Theni, Tamil Nadu, India. We focus on helping startups, entrepreneurs and businesses build their digital presence, improve customer engagement and simplify operations using modern technology.',
       'Our mission is to deliver practical, reliable and scalable digital solutions.',
       'To become a trusted digital technology partner for businesses across India and international markets.',
@@ -284,14 +290,14 @@ export function initDatabase() {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       'Harish K',
-      'Founder & CEO',
+      'Founder & Managing Director',
       'PIVO TECH',
       'Build. Grow. Automate.',
       'Theni, Tamil Nadu, India',
-      "Hello, I'm Harish K, Founder & CEO of PIVO TECH. I focus on building modern websites, digital growth solutions, AI-powered agents and business automation systems. My goal is to help businesses establish a strong digital presence, improve productivity and grow through practical technology solutions.",
+      "Hello, I'm Harish K, Founder & Managing Director of PIVO TECH. I focus on building modern websites, digital growth solutions, AI-powered agents and business automation systems. My goal is to help businesses establish a strong digital presence, improve productivity and grow through practical technology solutions.",
       '/assets/harish-founder.jpg',
       'To build a world-class technology firm rooted in integrity, delivering tangible digital leverage to startups, enterprises, and local businesses alike.',
-      'https://www.linkedin.com/in/harish-k-303480301/',
+      'https://www.linkedin.com/in/harish-k-303480401/',
       'https://www.instagram.com/_pivo.tech/',
       'harishkumaravel2007@gmail.com',
       '+91 99442 45043',
@@ -467,7 +473,7 @@ export function initDatabase() {
         technologies_json: JSON.stringify(['React', 'TypeScript', 'Tailwind CSS', 'Node.js', 'SQLite']),
         image_url: '/assets/projects/nexus-portal.svg',
         screenshots_json: JSON.stringify(['/assets/projects/nexus-portal.svg']),
-        live_url: 'https://pivotech.in/portfolio/nexus-corporate-portal',
+        live_url: null,
         github_url: 'https://github.com/harish-k/nexus-corporate-portal',
         completion_date: '2025-01',
         is_featured: 1,
@@ -477,14 +483,14 @@ export function initDatabase() {
       {
         name: 'Aura Commerce Platform',
         slug: 'aura-commerce-platform',
-        category: 'E-commerce',
+        category: 'E-commerce Websites',
         tagline: 'Minimalist modern e-commerce storefront with rapid cart experience.',
         description: 'An architectural demonstration of a streamlined e-commerce experience designed for lifestyle brands, with optimized product galleries and frictionless order flows.',
         case_study: 'Focused on micro-interactions, responsive image delivery, and optimized checkout UX to maximize transaction completion rates.',
         technologies_json: JSON.stringify(['React', 'TypeScript', 'Tailwind CSS', 'REST API', 'Node.js']),
         image_url: '/assets/projects/aura-commerce.svg',
         screenshots_json: JSON.stringify(['/assets/projects/aura-commerce.svg']),
-        live_url: 'https://pivotech.in/portfolio/aura-commerce-platform',
+        live_url: null,
         github_url: 'https://github.com/harish-k/aura-commerce',
         completion_date: '2025-02',
         is_featured: 1,
@@ -501,7 +507,7 @@ export function initDatabase() {
         technologies_json: JSON.stringify(['Gemini API', 'Node.js', 'TypeScript', 'Vector Context', 'Fastify']),
         image_url: '/assets/projects/omniassist-ai.svg',
         screenshots_json: JSON.stringify(['/assets/projects/omniassist-ai.svg']),
-        live_url: 'https://pivotech.in/portfolio/omniassist-intelligent-agent',
+        live_url: null,
         github_url: 'https://github.com/harish-k/omniassist-agent',
         completion_date: '2025-02',
         is_featured: 1,
@@ -531,7 +537,7 @@ export function initDatabase() {
     `).run(
       'Sri Balaji Stationery',
       'sri-balaji-stationery',
-      'E-commerce',
+      'E-commerce Websites',
       'Modern digital retail catalog and store website for office and stationery supplies.',
       'A streamlined digital presence and product catalogue built for Sri Balaji Stationery in Sowcarpet, Chennai. Features clean product indexing, direct WhatsApp ordering, and local store navigation.',
       'Engineered to help a traditional wholesale & retail stationery business expand its digital reach, showcase high-demand office products, and capture enquiries directly via WhatsApp.',
@@ -566,7 +572,7 @@ export function initDatabase() {
       JSON.stringify(['React 19', 'TypeScript', 'Tailwind CSS', 'Express', 'SQLite', 'WebSockets']),
       '/assets/projects/nexus-portal.svg',
       JSON.stringify(['/assets/projects/nexus-portal.svg']),
-      'https://pivotech.in/portfolio/pulseops-portal',
+      null,
       'https://github.com/harish-k/pulseops-portal',
       '2025-02',
       1,
@@ -594,7 +600,7 @@ export function initDatabase() {
       JSON.stringify(['Node.js', 'Webhooks', 'WhatsApp Business API', 'Cron', 'Automated PDF Engine']),
       '/assets/projects/omniassist-ai.svg',
       JSON.stringify(['/assets/projects/omniassist-ai.svg']),
-      'https://pivotech.in/portfolio/apex-flow-automator',
+      null,
       'https://github.com/harish-k/apex-flow-automator',
       '2025-02',
       1,
@@ -643,7 +649,7 @@ export function initDatabase() {
     { key: 'contact_phone', value: '+91 99442 45043', description: 'Public Contact Phone / WhatsApp' },
     { key: 'address_location', value: 'Theni, Tamil Nadu, India.', description: 'Headquarters Location' },
     { key: 'instagram_url', value: 'https://www.instagram.com/_pivo.tech/', description: 'Official Instagram' },
-    { key: 'linkedin_url', value: 'https://www.linkedin.com/in/harish-k-303480301/', description: 'Founder LinkedIn' }
+    { key: 'linkedin_url', value: 'https://www.linkedin.com/in/harish-k-303480401/', description: 'Founder LinkedIn' }
   ];
 
   const insertSetting = db.prepare(`

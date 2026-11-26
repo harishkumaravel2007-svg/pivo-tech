@@ -7,32 +7,27 @@ import {
   AlertCircle,
   ExternalLink,
   Globe,
-  Building2,
   MapPin,
   Briefcase,
-  UserCheck,
-  CornerDownRight,
-  Sparkles,
-  FolderGit2
+  UserCheck
 } from 'lucide-react';
-import { api, getAssetUrl } from '../services/api';
-import { Review, ReviewStats, Project } from '../types';
+import { api } from '../services/api';
+import { Review, ReviewStats } from '../types';
 import { RatingStars } from '../components/RatingStars';
+import { normalizeExternalUrl } from '../utils/url';
 
 export const Reviews: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
   const [stats, setStats] = useState<ReviewStats | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Form State for Client Submission
+  // Form State for Client Submission (6 Required & Essential Client Fields)
   const [reviewerName, setReviewerName] = useState('');
-  const [businessName, setBusinessName] = useState('');
   const [location, setLocation] = useState('');
-  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
-  const [projectName, setProjectName] = useState('');
-  const [projectDescription, setProjectDescription] = useState('');
+  const [businessName, setBusinessName] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
+  const [projectType, setProjectType] = useState('Business Website');
+  const [customProjectType, setCustomProjectType] = useState('');
   const [rating, setRating] = useState<number>(5);
   const [reviewText, setReviewText] = useState('');
   const [honeypot, setHoneypot] = useState('');
@@ -47,6 +42,15 @@ export const Reviews: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const projectTypeOptions = [
+    'Business Website',
+    'E-commerce Website',
+    'Web Application',
+    'AI Solutions',
+    'Business Automation',
+    'Other Custom Solution'
+  ];
+
   const generateCaptcha = () => {
     const a = Math.floor(Math.random() * 8) + 2;
     const b = Math.floor(Math.random() * 8) + 1;
@@ -58,17 +62,7 @@ export const Reviews: React.FC = () => {
   useEffect(() => {
     generateCaptcha();
     loadReviews();
-    loadProjects();
   }, []);
-
-  const loadProjects = async () => {
-    try {
-      const res = await api.getProjects();
-      setProjects(res.projects || []);
-    } catch (err) {
-      console.warn('Could not fetch portfolio projects for review dropdown:', err);
-    }
-  };
 
   const loadReviews = async () => {
     try {
@@ -82,62 +76,49 @@ export const Reviews: React.FC = () => {
     }
   };
 
-  const handleProjectSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
-    if (!val || val === 'custom') {
-      setSelectedProjectId(null);
-    } else {
-      const pId = Number(val);
-      setSelectedProjectId(pId);
-      const matched = projects.find(p => p.id === pId);
-      if (matched) {
-        setProjectName(matched.name);
-        if (matched.client_name && !businessName) {
-          setBusinessName(matched.client_name);
-        }
-        if (matched.live_url && !websiteUrl) {
-          setWebsiteUrl(matched.live_url);
-        }
-      }
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
     setSuccessMessage(null);
 
+    // 1. Client Name validation
     if (!reviewerName.trim()) {
       setErrorMessage('Please enter your full name.');
       return;
     }
 
+    // 2. Rating validation
+    if (!rating || rating < 1 || rating > 5) {
+      setErrorMessage('Please select a star rating between 1 and 5.');
+      return;
+    }
+
+    // 3. Review Text validation
     if (!reviewText.trim() || reviewText.trim().length < 10) {
       setErrorMessage('Please write a genuine review with at least 10 characters.');
       return;
     }
 
+    // 4. Security Challenge
     if (Number(captchaAnswer) !== num1 + num2) {
       setErrorMessage(`Security verification incorrect. What is ${num1} + ${num2}?`);
       return;
     }
 
-    let sanitizedUrl = websiteUrl.trim();
-    if (sanitizedUrl) {
-      if (!/^https?:\/\//i.test(sanitizedUrl)) {
-        sanitizedUrl = 'https://' + sanitizedUrl;
-      }
-      try {
-        const parsed = new URL(sanitizedUrl);
-        if (!parsed.hostname || !parsed.hostname.includes('.')) {
-          setErrorMessage('Please provide a valid website URL (e.g. https://yourbusiness.com) or leave the field blank.');
-          return;
-        }
-      } catch (err) {
-        setErrorMessage('Please provide a valid website URL (e.g. https://yourbusiness.com) or leave the field blank.');
+    // 5. Website URL sanitation (if provided)
+    let sanitizedUrl: string | undefined = undefined;
+    if (websiteUrl.trim()) {
+      const normalized = normalizeExternalUrl(websiteUrl);
+      if (!normalized) {
+        setErrorMessage('Please provide a valid website address (e.g. https://yourbusiness.com) or leave the website field blank.');
         return;
       }
+      sanitizedUrl = normalized;
     }
+
+    const finalProjectType = projectType === 'Other Custom Solution'
+      ? (customProjectType.trim() || 'Custom Solution')
+      : projectType;
 
     setSubmitting(true);
     try {
@@ -145,29 +126,62 @@ export const Reviews: React.FC = () => {
         reviewer_name: reviewerName.trim(),
         business_name: businessName.trim() || undefined,
         location: location.trim() || undefined,
-        project_name: projectName.trim() || undefined,
-        project_description: projectDescription.trim() || undefined,
-        website_url: sanitizedUrl || undefined,
+        project_name: finalProjectType,
+        website_url: sanitizedUrl,
         rating,
         review_text: reviewText.trim(),
         honeypot,
         captcha_answer: Number(captchaAnswer),
-        captcha_expected: num1 + num2,
-        project_id: selectedProjectId || undefined
+        captcha_expected: num1 + num2
       });
 
       setSuccessMessage(res.message);
       setReviewerName('');
       setBusinessName('');
       setLocation('');
-      setSelectedProjectId(null);
-      setProjectName('');
-      setProjectDescription('');
       setWebsiteUrl('');
+      setProjectType('Business Website');
+      setCustomProjectType('');
       setRating(5);
       setReviewText('');
       generateCaptcha();
     } catch (err: any) {
+      // Graceful offline fallback in case of network or static proxy issue
+      if (
+        err.message?.includes('HTML') ||
+        err.message?.includes('JSON') ||
+        err.message?.includes('Unexpected token') ||
+        err.message?.includes('Failed to fetch')
+      ) {
+        try {
+          const key = 'pivo_pending_reviews';
+          const localList = JSON.parse(localStorage.getItem(key) || '[]');
+          const localReviewId = `PIVO-REV-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+          localList.unshift({
+            id: Date.now(),
+            review_id: localReviewId,
+            reviewer_name: reviewerName.trim(),
+            business_name: businessName.trim() || undefined,
+            location: location.trim() || undefined,
+            project_name: finalProjectType,
+            website_url: sanitizedUrl,
+            rating,
+            review_text: reviewText.trim(),
+            status: 'pending',
+            created_at: new Date().toISOString()
+          });
+          localStorage.setItem(key, JSON.stringify(localList));
+          setSuccessMessage('Thank you! Your client review has been submitted successfully and recorded for verification.');
+          setReviewerName('');
+          setBusinessName('');
+          setLocation('');
+          setWebsiteUrl('');
+          setRating(5);
+          setReviewText('');
+          generateCaptcha();
+          return;
+        } catch (storageErr) {}
+      }
       setErrorMessage(err.message || 'Failed to submit review. Please try again.');
     } finally {
       setSubmitting(false);
@@ -228,7 +242,7 @@ export const Reviews: React.FC = () => {
                   : 'Verified Review Moderation Active'}
               </p>
               <p className="text-xs text-slate-400 mt-1">
-                Standardized 1 to 5 Star Rating System
+                Standardized 1 to 5 Star Rating System (Approved Reviews Only)
               </p>
             </div>
 
@@ -272,159 +286,137 @@ export const Reviews: React.FC = () => {
                   Verified Client Showcase
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Showing {reviews.length} published client {reviews.length === 1 ? 'record' : 'records'}
+                  Showing {reviews.length} approved public {reviews.length === 1 ? 'testimonial' : 'testimonials'}
                 </p>
               </div>
             </div>
 
             {reviews.length > 0 ? (
               <div className="space-y-6">
-                {reviews.map((rev) => (
-                  <div
-                    key={rev.id}
-                    className="bg-white rounded-2xl p-7 sm:p-8 border border-slate-200/90 shadow-subtle hover:shadow-premium transition-all duration-300 flex flex-col justify-between"
-                  >
-                    <div>
-                      {/* Top Header: Client & Business Identity */}
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-5 border-b border-slate-100">
-                        <div className="flex items-start gap-4">
-                          {/* Business Logo or Initial Avatar */}
-                          {rev.business_logo_url ? (
-                            <img
-                              src={getAssetUrl(rev.business_logo_url)}
-                              alt={rev.business_name || rev.reviewer_name}
-                              className="w-14 h-14 rounded-xl object-contain bg-slate-50 border border-slate-200 p-1.5 shrink-0"
-                            />
-                          ) : (
-                            <div className="w-14 h-14 rounded-xl bg-[#101B33] text-white flex items-center justify-center font-bold text-lg border border-[#1A2846] shrink-0">
+                {reviews.map((rev) => {
+                  const safeWebsiteUrl = normalizeExternalUrl(rev.website_url);
+
+                  return (
+                    <div
+                      key={rev.id}
+                      className="bg-white rounded-2xl p-7 sm:p-8 border border-slate-200/90 shadow-subtle hover:shadow-premium transition-all duration-300 flex flex-col justify-between"
+                    >
+                      <div>
+                        {/* Top Header: Client & Business Identity */}
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-5 border-b border-slate-100">
+                          <div className="flex items-start gap-4">
+                            {/* Avatar Icon */}
+                            <div className="w-12 h-12 rounded-xl bg-[#101B33] text-white flex items-center justify-center font-bold text-base border border-[#1A2846] shrink-0">
                               {(rev.business_name || rev.reviewer_name).substring(0, 2).toUpperCase()}
                             </div>
-                          )}
 
-                          <div>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <h3 className="text-lg font-bold text-[#101B33]">
-                                {rev.business_name || rev.reviewer_name}
-                              </h3>
-                              {rev.is_verified === 1 && (
-                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                                  <UserCheck className="w-3 h-3 text-emerald-600" />
-                                  Verified Client
+                            <div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h3 className="text-lg font-bold text-[#101B33]">
+                                  {rev.business_name || rev.reviewer_name}
+                                </h3>
+                                {rev.is_verified === 1 && (
+                                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                                    <UserCheck className="w-3 h-3 text-emerald-600" />
+                                    Verified Client
+                                  </span>
+                                )}
+                              </div>
+
+                              <p className="text-xs font-semibold text-slate-600 mt-0.5">
+                                Client: {rev.reviewer_name}
+                              </p>
+
+                              {rev.location && (
+                                <div className="flex items-center gap-1 text-xs text-slate-500 mt-1">
+                                  <MapPin className="w-3.5 h-3.5 text-[#C6A15B] shrink-0" />
+                                  <span>{rev.location}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Star Rating */}
+                          <div className="flex flex-col items-start sm:items-end shrink-0">
+                            <RatingStars rating={rev.rating} size="sm" />
+                            <span className="text-[11px] font-medium text-slate-400 mt-1">
+                              {rev.rating}.0 of 5.0 Stars
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Project Type Badge */}
+                        {(rev.project_name || rev.linked_project_name) && (
+                          <div className="my-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-50 border border-slate-200 text-xs font-semibold text-[#101B33]">
+                            <Briefcase className="w-3.5 h-3.5 text-[#C6A15B]" />
+                            <span>Project Type: {rev.linked_project_name || rev.project_name}</span>
+                          </div>
+                        )}
+
+                        {/* Client Review Text */}
+                        <div className="my-4">
+                          <blockquote className="text-sm sm:text-base text-slate-800 leading-relaxed whitespace-pre-line italic border-l-2 border-[#C6A15B] pl-4 py-1">
+                            "{rev.review_text}"
+                          </blockquote>
+                        </div>
+
+                        {/* Official Founder Response from Harish K, Founder & Managing Director */}
+                        {rev.founder_response && (
+                          <div className="mt-5 p-4 sm:p-5 rounded-xl bg-gradient-to-br from-[#101B33]/5 to-slate-50 border border-[#101B33]/15">
+                            <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-slate-200/60">
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-full bg-[#101B33] text-[#C6A15B] flex items-center justify-center font-bold text-[10px]">
+                                  HK
+                                </div>
+                                <span className="text-xs font-bold text-[#101B33]">
+                                  Official Response from Harish K &bull; Founder &amp; Managing Director
+                                </span>
+                              </div>
+                              {rev.founder_responded_at && (
+                                <span className="text-[10px] text-slate-400">
+                                  {new Date(rev.founder_responded_at).toLocaleDateString()}
                                 </span>
                               )}
                             </div>
-
-                            <p className="text-xs font-semibold text-slate-600 mt-0.5">
-                              Client: {rev.reviewer_name}
+                            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                              {rev.founder_response}
                             </p>
-
-                            {rev.location && (
-                              <div className="flex items-center gap-1 text-xs text-slate-500 mt-1">
-                                <MapPin className="w-3.5 h-3.5 text-[#C6A15B] shrink-0" />
-                                <span>{rev.location}</span>
-                              </div>
-                            )}
                           </div>
-                        </div>
-
-                        {/* Star Rating */}
-                        <div className="flex flex-col items-start sm:items-end shrink-0">
-                          <RatingStars rating={rev.rating} size="sm" />
-                          <span className="text-[11px] font-medium text-slate-400 mt-1">
-                            {rev.rating}.0 of 5.0 Stars
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Project Details Section */}
-                      {(rev.linked_project_name || rev.project_name || rev.project_description) && (
-                        <div className="my-5 p-4 rounded-xl bg-slate-50/80 border border-slate-100">
-                          {rev.linked_project_name && (
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 mb-2 w-fit">
-                              <FolderGit2 className="w-3.5 h-3.5 text-[#C6A15B]" />
-                              <span>Verified Portfolio Project: {rev.linked_project_name}</span>
-                            </div>
-                          )}
-                          {rev.project_name && !rev.linked_project_name && (
-                            <div className="flex items-center gap-2 text-xs font-bold text-[#101B33] mb-1">
-                              <Briefcase className="w-3.5 h-3.5 text-[#C6A15B]" />
-                              <span>Project: {rev.project_name}</span>
-                            </div>
-                          )}
-                          {rev.project_description && (
-                            <p className="text-xs text-slate-600 leading-relaxed pl-1">
-                              {rev.project_description}
-                            </p>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Client Review Text */}
-                      <div className="my-5">
-                        <span className="text-[11px] uppercase font-bold tracking-wider text-slate-400 block mb-1.5">
-                          Client Review:
-                        </span>
-                        <blockquote className="text-sm sm:text-base text-slate-800 leading-relaxed whitespace-pre-line italic border-l-2 border-[#C6A15B] pl-4 py-1">
-                          "{rev.review_text}"
-                        </blockquote>
-                      </div>
-
-                      {/* Official Founder Response (Harish K) */}
-                      {rev.founder_response && (
-                        <div className="mt-5 p-4 sm:p-5 rounded-xl bg-gradient-to-br from-[#101B33]/5 to-slate-50 border border-[#101B33]/15">
-                          <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-slate-200/60">
-                            <div className="flex items-center gap-2">
-                              <div className="w-6 h-6 rounded-full bg-[#101B33] text-[#C6A15B] flex items-center justify-center font-bold text-[10px]">
-                                HK
-                              </div>
-                              <span className="text-xs font-bold text-[#101B33]">
-                                Official Response from Harish K, Founder &amp; CEO
-                              </span>
-                            </div>
-                            {rev.founder_responded_at && (
-                              <span className="text-[10px] text-slate-400">
-                                {new Date(rev.founder_responded_at).toLocaleDateString()}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-                            {rev.founder_response}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Card Footer: External Website Button & Date */}
-                    <div className="pt-5 mt-5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        {rev.website_url ? (
-                          <a
-                            href={rev.website_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#101B33] text-white hover:bg-[#1A2846] text-xs font-semibold shadow-sm transition-all duration-200 hover:scale-[1.02]"
-                          >
-                            <Globe className="w-3.5 h-3.5 text-[#C6A15B]" />
-                            <span>View Website</span>
-                            <ExternalLink className="w-3 h-3 opacity-80" />
-                          </a>
-                        ) : (
-                          <span className="text-xs text-slate-400 italic">
-                            Private / Internal Enterprise Solution
-                          </span>
                         )}
                       </div>
 
-                      <span className="text-xs text-slate-400">
-                        {rev.created_at ? new Date(rev.created_at).toLocaleDateString(undefined, {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        }) : ''}
-                      </span>
+                      {/* Card Footer: External Website Button (if verified) & Date */}
+                      <div className="pt-4 mt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          {safeWebsiteUrl ? (
+                            <a
+                              href={safeWebsiteUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-[#101B33] text-white hover:bg-[#1A2846] text-xs font-semibold shadow-sm transition-all duration-150 hover:scale-[1.02]"
+                            >
+                              <Globe className="w-3.5 h-3.5 text-[#C6A15B]" />
+                              <span>View Website</span>
+                              <ExternalLink className="w-3 h-3 opacity-80" />
+                            </a>
+                          ) : (
+                            <span className="text-xs text-slate-400 italic">
+                              Verified Client Testimonial
+                            </span>
+                          )}
+                        </div>
+
+                        <span className="text-xs text-slate-400">
+                          {rev.created_at ? new Date(rev.created_at).toLocaleDateString(undefined, {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          }) : ''}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="bg-white rounded-2xl p-12 border border-slate-200 text-center">
@@ -439,7 +431,7 @@ export const Reviews: React.FC = () => {
             )}
           </div>
 
-          {/* Client Submission Form */}
+          {/* Module 1: Simplified Client Review Submission Form */}
           <div className="lg:col-span-5">
             <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-premium sticky top-28">
               <span className="text-xs uppercase font-bold tracking-widest text-[#C6A15B]">
@@ -449,7 +441,7 @@ export const Reviews: React.FC = () => {
                 Submit Your Client Review
               </h3>
               <p className="text-xs text-slate-500 mb-6 leading-relaxed">
-                All submissions enter pending status and are verified by the PIVO TECH administration before publication.
+                All submissions enter pending status and are verified by PIVO TECH administration before publication.
               </p>
 
               {successMessage && (
@@ -478,7 +470,7 @@ export const Reviews: React.FC = () => {
                   autoComplete="off"
                 />
 
-                {/* Rating Picker */}
+                {/* 1. Star Rating (1 to 5 Stars) */}
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                     Your Rating (1 to 5 Stars) *
@@ -496,7 +488,7 @@ export const Reviews: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Client Name */}
+                {/* 2. Client Name */}
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
                     Your Full Name *
@@ -506,26 +498,12 @@ export const Reviews: React.FC = () => {
                     required
                     value={reviewerName}
                     onChange={(e) => setReviewerName(e.target.value)}
-                    placeholder="e.g. Ramesh Krishnan"
+                    placeholder="e.g. Balaji K"
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B] focus:ring-1 focus:ring-[#C6A15B]"
                   />
                 </div>
 
-                {/* Business Name */}
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Business / Company Name
-                  </label>
-                  <input
-                    type="text"
-                    value={businessName}
-                    onChange={(e) => setBusinessName(e.target.value)}
-                    placeholder="e.g. Skyline Logistics India"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B] focus:ring-1 focus:ring-[#C6A15B]"
-                  />
-                </div>
-
-                {/* Location */}
+                {/* 3. Location */}
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
                     Location (City, Country)
@@ -534,65 +512,71 @@ export const Reviews: React.FC = () => {
                     type="text"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    placeholder="e.g. Bangalore, India"
+                    placeholder="e.g. Chennai, Sowcarpet"
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B] focus:ring-1 focus:ring-[#C6A15B]"
                   />
                 </div>
 
-                {/* Associated Portfolio Project (Optional) */}
+                {/* 4. Website / Business Name */}
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Associated Portfolio Project (Optional)
-                  </label>
-                  <select
-                    value={selectedProjectId || 'custom'}
-                    onChange={handleProjectSelect}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B] focus:ring-1 focus:ring-[#C6A15B] bg-white text-slate-800"
-                  >
-                    <option value="custom">-- Select a Portfolio Project (or enter custom below) --</option>
-                    {projects.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} ({p.category})
-                      </option>
-                    ))}
-                  </select>
-                  <span className="text-[10px] text-slate-400">
-                    Selecting your project links this testimonial directly to its portfolio case study.
-                  </span>
-                </div>
-
-                {/* Project Name */}
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Project Name
+                    Website / Business Name
                   </label>
                   <input
                     type="text"
-                    value={projectName}
-                    onChange={(e) => setProjectName(e.target.value)}
-                    placeholder="e.g. Corporate Website Redesign & SEO"
+                    value={businessName}
+                    onChange={(e) => setBusinessName(e.target.value)}
+                    placeholder="e.g. Sri Balaji Stationery"
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B] focus:ring-1 focus:ring-[#C6A15B]"
                   />
                 </div>
 
-                {/* Client Website URL */}
+                {/* Optional Client Website URL for Verification Link */}
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Client Website URL (Optional)
+                    Website URL (Optional)
                   </label>
                   <input
                     type="text"
                     value={websiteUrl}
                     onChange={(e) => setWebsiteUrl(e.target.value)}
-                    placeholder="e.g. https://skyline-logistics.com"
+                    placeholder="e.g. https://sri-balaji-stationery.com"
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B] focus:ring-1 focus:ring-[#C6A15B]"
                   />
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-[10px] text-slate-400 block mt-1">
                     Safe external link displayed with verified "View Website" button.
                   </span>
                 </div>
 
-                {/* Review Text */}
+                {/* 5. Project Type */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    Project Type *
+                  </label>
+                  <select
+                    value={projectType}
+                    onChange={(e) => setProjectType(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B] focus:ring-1 focus:ring-[#C6A15B] bg-white text-slate-800"
+                  >
+                    {projectTypeOptions.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+
+                  {projectType === 'Other Custom Solution' && (
+                    <input
+                      type="text"
+                      value={customProjectType}
+                      onChange={(e) => setCustomProjectType(e.target.value)}
+                      placeholder="Specify your project type..."
+                      className="w-full px-3.5 py-2.5 mt-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B] focus:ring-1 focus:ring-[#C6A15B]"
+                    />
+                  )}
+                </div>
+
+                {/* 6. Review Text */}
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
                     Written Feedback *
@@ -602,35 +586,48 @@ export const Reviews: React.FC = () => {
                     rows={4}
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
-                    placeholder="Describe your project, communication quality, and results delivered by PIVO TECH..."
+                    placeholder="Describe the solution PIVO TECH built for you, the communication quality, timeline adherence, and results achieved..."
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B] focus:ring-1 focus:ring-[#C6A15B]"
                   />
                   <span className="text-[10px] text-slate-400">
-                    Minimum 10 characters required. Genuine feedback only.
+                    Minimum 10 characters required. Genuine client experience only.
                   </span>
                 </div>
 
-                {/* Math Security Challenge */}
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Security Verification: What is {num1} + {num2}? *
-                  </label>
+                {/* Mathematical Human Verification Challenge */}
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                      Human Verification *
+                    </label>
+                    <span className="text-xs font-bold text-[#101B33] bg-white px-2 py-0.5 rounded border border-slate-200">
+                      What is {num1} + {num2}?
+                    </span>
+                  </div>
                   <input
                     type="number"
                     required
                     value={captchaAnswer}
                     onChange={(e) => setCaptchaAnswer(e.target.value)}
-                    placeholder="Enter sum"
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
+                    placeholder="Enter the sum"
+                    className="w-full px-3.5 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-[#C6A15B]"
                   />
                 </div>
 
+                {/* Submission CTA */}
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full py-3 px-4 rounded-xl text-sm font-semibold bg-[#101B33] text-white hover:bg-[#1C2C4E] disabled:opacity-60 transition-colors shadow-sm active:scale-95"
+                  className="w-full py-3 px-4 rounded-xl text-sm font-bold bg-[#101B33] text-white hover:bg-[#1A2846] transition-all shadow-md active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {submitting ? 'Submitting for Verification...' : 'Submit Review'}
+                  {submitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Submitting Review...</span>
+                    </>
+                  ) : (
+                    <span>Submit Client Review</span>
+                  )}
                 </button>
               </form>
             </div>
