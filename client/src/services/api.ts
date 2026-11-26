@@ -324,40 +324,12 @@ export const api = {
     captcha_expected?: number;
     project_id?: number | null;
   }): Promise<{ message: string; review_id?: string }> => {
-    try {
-      const res = await fetch(`${API_BASE}/reviews/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(reviewData)
-      });
-      return await parseResponse<{ message: string; review_id?: string }>(res, 'Failed to submit review');
-    } catch (err: any) {
-      // If the backend API is unreachable or returned HTML (e.g. on Netlify / Cloudflare static hosting before backend deployment):
-      // Automatically store in localStorage so client reviews are recorded and NEVER lost, avoiding any unhandled JSON crash!
-      try {
-        const key = 'pivo_pending_reviews';
-        const localList = JSON.parse(localStorage.getItem(key) || '[]');
-        const localReviewId = `PIVO-REV-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-        localList.unshift({
-          id: Date.now(),
-          review_id: localReviewId,
-          ...reviewData,
-          status: 'pending',
-          is_offline_pending: true,
-          created_at: new Date().toISOString()
-        });
-        localStorage.setItem(key, JSON.stringify(localList));
-        return {
-          message: 'Thank you! Your client review has been submitted successfully and recorded for verification.',
-          review_id: localReviewId
-        };
-      } catch (storageErr) {
-        // Fallback friendly message if localStorage fails
-        return {
-          message: 'Thank you! Your client review has been submitted for verification.'
-        };
-      }
-    }
+    const res = await fetch(`${API_BASE}/reviews/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(reviewData)
+    });
+    return await parseResponse<{ message: string; review_id?: string }>(res, 'Failed to submit review');
   },
   getAdminReviews: async (params?: {
     status?: string;
@@ -373,36 +345,10 @@ export const api = {
     if (params?.q) query.set('q', params.q);
     const qs = query.toString() ? `?${query.toString()}` : '';
 
-    let serverData: {
-      reviews: Review[];
-      summary: { total: number; pending: number; approved: number; rejected: number; average: number };
-    } = {
-      reviews: [],
-      summary: { total: 0, pending: 0, approved: 0, rejected: 0, average: 5.0 }
-    };
-
-    try {
-      const res = await fetch(`${API_BASE}/reviews/admin/all${qs}`, {
-        headers: getAuthHeaders()
-      });
-      serverData = await parseResponse(res, 'Failed to fetch reviews for admin');
-    } catch (err) {
-      console.warn('Could not fetch server reviews, checking offline cache:', err);
-    }
-
-    // Merge offline pending reviews from localStorage if any
-    try {
-      const offlineReviews = JSON.parse(localStorage.getItem('pivo_pending_reviews') || '[]');
-      if (Array.isArray(offlineReviews) && offlineReviews.length > 0) {
-        serverData.reviews = [...offlineReviews, ...serverData.reviews];
-        serverData.summary.total += offlineReviews.length;
-        serverData.summary.pending += offlineReviews.length;
-      }
-    } catch (e) {
-      // ignore
-    }
-
-    return serverData;
+    const res = await fetch(`${API_BASE}/reviews/admin/all${qs}`, {
+      headers: getAuthHeaders()
+    });
+    return await parseResponse(res, 'Failed to fetch reviews for admin');
   },
   adminAddClientReview: async (reviewData: Partial<Review>): Promise<{ message: string; review: Review }> => {
     const res = await fetch(`${API_BASE}/reviews/admin/add`, {
@@ -476,44 +422,12 @@ export const api = {
     captcha_answer?: number;
     captcha_expected?: number;
   }): Promise<{ message: string; enquiryId?: number; lead_id?: string; success?: boolean }> => {
-    try {
-      const res = await fetch(`${API_BASE}/enquiries/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(enquiryData)
-      });
-      return await parseResponse<{ message: string; enquiryId?: number; lead_id?: string; success?: boolean }>(res, 'Failed to submit enquiry');
-    } catch (err: any) {
-      if (
-        err.message?.includes('Backend API is not reachable') ||
-        err.message?.includes('Failed to fetch') ||
-        err.name === 'TypeError' ||
-        err.message?.includes('HTML') ||
-        err.message?.includes('JSON')
-      ) {
-        try {
-          const key = 'pivo_pending_enquiries';
-          const localList = JSON.parse(localStorage.getItem(key) || '[]');
-          const id = Date.now();
-          const lead_id = `PIVO-LEAD-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-          localList.unshift({
-            id,
-            lead_id,
-            ...enquiryData,
-            status: 'new',
-            created_at: new Date().toISOString()
-          });
-          localStorage.setItem(key, JSON.stringify(localList));
-          return {
-            success: true,
-            message: 'Thank you! Your project enquiry has been submitted. Harish K and the PIVO TECH team will contact you shortly.',
-            enquiryId: id,
-            lead_id
-          };
-        } catch (storageErr) {}
-      }
-      throw err;
-    }
+    const res = await fetch(`${API_BASE}/enquiries/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(enquiryData)
+    });
+    return await parseResponse<{ message: string; enquiryId?: number; lead_id?: string; success?: boolean }>(res, 'Failed to submit enquiry');
   },
   getAdminEnquiries: async (params?: {
     status?: string;

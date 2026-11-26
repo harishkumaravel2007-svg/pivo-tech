@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
 
-import { initDatabase } from './db.js';
+import { initDatabase, db } from './db.js';
 import authRoutes from './routes/auth.js';
 import companyRoutes from './routes/company.js';
 import founderRoutes from './routes/founder.js';
@@ -76,17 +76,31 @@ app.use('/api/enquiries', enquiriesRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/upload', uploadRoutes);
 
-// Health check
+// Health check with active SQLite database readiness probe
 app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'healthy',
+  let dbStatus = 'disconnected';
+  try {
+    const result = db.prepare('SELECT 1 as ok').get();
+    if (result && result.ok === 1) {
+      dbStatus = 'connected';
+    }
+  } catch (err) {
+    dbStatus = 'error';
+  }
+
+  const isHealthy = dbStatus === 'connected';
+  res.status(isHealthy ? 200 : 503).json({
+    status: isHealthy ? 'healthy' : 'degraded',
+    service: 'PIVO TECH API',
     business: 'PIVO TECH',
     tagline: 'Build. Grow. Automate.',
+    database: dbStatus,
+    uptime_seconds: Math.floor(process.uptime()),
     timestamp: new Date().toISOString()
   });
 });
 
-// Production client serving
+// Production client serving (for unified deployments)
 const clientDistPath = path.resolve(__dirname, '../../client/dist');
 if (fs.existsSync(clientDistPath)) {
   app.use(express.static(clientDistPath));
@@ -95,15 +109,16 @@ if (fs.existsSync(clientDistPath)) {
   });
 }
 
-// Error handling middleware
+// Production error handling middleware
 app.use((err, req, res, next) => {
   console.error('[Server Error]', err);
+  const isProd = process.env.NODE_ENV === 'production';
   res.status(err.status || 500).json({
-    error: err.message || 'Internal Server Error'
+    error: isProd && !err.status ? 'Internal Server Error' : (err.message || 'Internal Server Error')
   });
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`===============================================`);
   console.log(`  PIVO TECH Server running on port ${PORT}`);
   console.log(`  Tagline: Build. Grow. Automate.`);
@@ -111,3 +126,26 @@ app.listen(PORT, () => {
   console.log(`  API Base: http://localhost:${PORT}/api`);
   console.log(`===============================================`);
 });
+
+// Graceful shutdown handling for container and server restarts (Render / Docker)
+function gracefulShutdown(signal) {
+  console.log(`[Server] Received ${signal}. Initiating graceful shutdown...`);
+  server.close(() => {
+    console.log('[Server] HTTP server closed.');
+    try {
+      db.close();
+      console.log('[Database] SQLite database connection closed.');
+    } catch (e) {
+      console.error('[Database] Error closing SQLite connection:', e);
+    }
+    process.exit(0);
+  });
+
+  setTimeout(() => {
+    console.error('[Server] Forceful shutdown initiated after timeout.');
+    process.exit(1);
+  }, 10000).unref();
+}
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));

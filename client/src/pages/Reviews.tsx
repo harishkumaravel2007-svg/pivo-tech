@@ -146,43 +146,7 @@ export const Reviews: React.FC = () => {
       setReviewText('');
       generateCaptcha();
     } catch (err: any) {
-      // Graceful offline fallback in case of network or static proxy issue
-      if (
-        err.message?.includes('HTML') ||
-        err.message?.includes('JSON') ||
-        err.message?.includes('Unexpected token') ||
-        err.message?.includes('Failed to fetch')
-      ) {
-        try {
-          const key = 'pivo_pending_reviews';
-          const localList = JSON.parse(localStorage.getItem(key) || '[]');
-          const localReviewId = `PIVO-REV-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-          localList.unshift({
-            id: Date.now(),
-            review_id: localReviewId,
-            reviewer_name: reviewerName.trim(),
-            business_name: businessName.trim() || undefined,
-            location: location.trim() || undefined,
-            project_name: finalProjectType,
-            website_url: sanitizedUrl,
-            rating,
-            review_text: reviewText.trim(),
-            status: 'pending',
-            created_at: new Date().toISOString()
-          });
-          localStorage.setItem(key, JSON.stringify(localList));
-          setSuccessMessage('Thank you! Your client review has been submitted successfully and recorded for verification.');
-          setReviewerName('');
-          setBusinessName('');
-          setLocation('');
-          setWebsiteUrl('');
-          setRating(5);
-          setReviewText('');
-          generateCaptcha();
-          return;
-        } catch (storageErr) {}
-      }
-      setErrorMessage(err.message || 'Failed to submit review. Please try again.');
+      setErrorMessage(err.message || 'Failed to submit review to server. Please verify your connection and try again.');
     } finally {
       setSubmitting(false);
     }
